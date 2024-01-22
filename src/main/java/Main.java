@@ -1,16 +1,20 @@
-import Wrapper.MessageWrapper;
+import Init.CommandBuilder;
 import io.github.cdimascio.dotenv.Dotenv;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         // Get Token - Set Token
         Dotenv dotenv = Dotenv.load();
         String token = dotenv.get("TOKEN");
@@ -29,5 +33,13 @@ public class Main {
             throw new RuntimeException(e);
         }
 
+        JDA Orion = JDABuilder.createDefault(token)
+                .addEventListeners()
+                .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+                .build().awaitReady();
+
+        CommandBuilder.BuildCommands(Orion);
+
     }
+
 }

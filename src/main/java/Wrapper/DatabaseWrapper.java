@@ -16,9 +16,9 @@ import com.mongodb.client.MongoDatabase;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class DatabaseWrapper {
-    private String username = Dotenv.load().get("MongoUser");
-    private String password = Dotenv.load().get("MongoPass");
-    private String dbConnectionString = "mongodb+srv://" + username + ":" + password + "@orionmongo.wnlq83d.mongodb.net/?retryWrites=true&w=majority";
+    private final String username = Dotenv.load().get("MongoUser");
+    private final String password = Dotenv.load().get("MongoPass");
+    private final String dbConnectionString = "mongodb+srv://" + username + ":" + password + "@orionmongo.wnlq83d.mongodb.net/?retryWrites=true&w=majority";
 
     public DatabaseWrapper() {
         Logger logger = Logger.getLogger("orion");
