@@ -17,6 +17,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 
 import Errors.DBConnectionException;
 import Errors.DBEmptyQueueException;
@@ -55,7 +57,7 @@ public class DatabaseWrapper {
         }
     }
 
-    public MongoCollection getCollection() throws DBConnectionException{
+    private MongoCollection getCollection() throws DBConnectionException{
 
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
@@ -77,14 +79,14 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection collection = database.getCollection("queue");
                 Document result;
-                ArrayList<Document> a;
+                ArrayList<Document> queue;
                 try {
                     result = (Document) collection.find(new Document("guildID", guildID)).first();
-                    a = (ArrayList<Document>) result.get("queue");
-                    if (a.get(0).isEmpty()) {
+                    queue = (ArrayList<Document>) result.get("queue");
+                    if (queue.get(0).isEmpty()) {
                         throw new DBEmptyQueueException("Queue is empty or does not exist.");
                     }
-                    return a;
+                    return queue;
                 } catch (Exception e) {
                     throw new DBEmptyQueueException("Queue is empty or does not exist.");
                 }
@@ -97,6 +99,38 @@ public class DatabaseWrapper {
         }
     }
 
+    private void createQueue(String guildID, String platform, String songID) throws DBConnectionException{
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection collection = database.getCollection("queue");
 
+                collection.deleteMany(new Document("guildID", guildID));
+                collection.insertOne(new Document("guildID", guildID)
+                    .append("queue", new Document("platform", platform)
+                        .append("songID", songID)));
+            } catch (MongoException e) {
+                logger.warning("Error creating Queue: " + e.getMessage());
+                throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
+            }
+        }
+    }
+
+    public void addSong(String guildID, String platform, String songID) throws DBConnectionException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection collection = database.getCollection("queue");
+
+                Document newSong = new Document("platform", platform)
+                    .append("songID", songID);
+
+                collection.updateOne(Filters.eq("guildID", guildID), Updates.addToSet("queue", newSong));
+            } catch (MongoException e) {
+                logger.warning("Error adding song to Queue: " + e.getMessage());
+                throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
+            }
+        }
+    }
 
 }
