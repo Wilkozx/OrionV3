@@ -6,11 +6,20 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.awt.*;
 
 public class MessageWrapper {
-    public static void genericResponse(SlashCommandInteractionEvent event, String title, String body, Color colour) {
+    public static void genericResponse(SlashCommandInteractionEvent event, String title, String body, Color colour) { //TRY NOT TO USE SEE BELOW
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(title);
         embedBuilder.setDescription(body);
         embedBuilder.setColor(colour);
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    public static void genericResponse(SlashCommandInteractionEvent event, String title, String body) { //USE THIS IF YOU DONT NEED A SPECIAL COLOR
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(title);
+        embedBuilder.setDescription(body);
+        embedBuilder.setColor(new Color(255,69,0));
 
         event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
     }

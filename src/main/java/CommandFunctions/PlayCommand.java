@@ -22,7 +22,7 @@ public class PlayCommand {
         // Check if the bot is already connected in a channel if so end;
         if(Objects.requireNonNull(event.getGuild()).getAudioManager().isConnected()) {
             MessageWrapper.errorResponse(event, "Orion occupies another nebula! Choose a different voice channel for stellar conversation.");
-            logger.info("User " + event.getUser().getName() + "tried to use /join, however already connected in a channel.");
+            logger.info("User " + event.getUser().getName() + " tried to use /join, however already connected in a channel.");
             return false;
         }
 
@@ -41,8 +41,8 @@ public class PlayCommand {
 
             updateActiveChannel(event.getChannel().asTextChannel());
 
-            MessageWrapper.genericResponse(event, "Stardust trail forming... entering your nebula!", userChannel.getName(), Color.green);
-            logger.info("Successfully joined " + userChannel.getName() + "at the request of " + event.getUser().getName() + ".");
+            MessageWrapper.genericResponse(event, "Stardust trail forming... entering your nebula!", userChannel.getName());
+            logger.info("Successfully joined " + userChannel.getName() + " at the request of " + event.getUser().getName() + ".");
             return true;
 
         } catch (Exception e) {
