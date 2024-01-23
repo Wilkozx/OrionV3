@@ -18,7 +18,7 @@ public class MessageWrapper {
     public static void errorResponse(SlashCommandInteractionEvent event, String error) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setDescription(error);
-        embedBuilder.setAuthor("Error", null, "https://banner2.cleanpng.com/20240115/egx/transparent-sad-face-unclear-expression-sad-yellow-face-with-closed-ey65a60b5e5e64d4.5105028617053807023866.jpg");
+        embedBuilder.setAuthor("Error", null, "https://www.lifepng.com/wp-content/uploads/2020/12/Letter-X-Roundlet-png-hd.png");
         embedBuilder.setColor(Color.red);
 
         event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();

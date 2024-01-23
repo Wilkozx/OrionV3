@@ -1,4 +1,5 @@
 import Init.CommandBuilder;
+import Listeners.CommandListener;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class Main {
         }
 
         JDA Orion = JDABuilder.createDefault(token)
-                .addEventListeners()
+                .addEventListeners(new CommandListener())
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .build().awaitReady();
 
