@@ -1,69 +1,109 @@
 package CommandFunctions;
 
+import Errors.DBConnectionException;
+import MusicSearch.Spotify;
+import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.managers.AudioManager;
 
-import java.awt.*;
-import java.util.Arrays;
+import java.net.URI;
 import java.util.Objects;
 import java.util.logging.Logger;
 
 public class PlayCommand {
 
-    public static boolean joinCommand(SlashCommandInteractionEvent event) {
+    public static boolean playCommand(SlashCommandInteractionEvent event) throws DBConnectionException {
         Logger logger = Logger.getLogger("orion");
+
         event.deferReply().queue();
-        Member member = event.getMember();
+        String song = Objects.requireNonNull(event.getOption("song")).getAsString();
+        Platform platform = Platform.NULL;
+        short goodURL;
 
-        // Check if the bot is already connected in a channel if so end;
-        if(Objects.requireNonNull(event.getGuild()).getAudioManager().isConnected()) {
-            MessageWrapper.errorResponse(event, "Orion occupies another nebula! Choose a different voice channel for stellar conversation.");
-            logger.info("User " + event.getUser().getName() + " tried to use /join, however already connected in a channel.");
-            return false;
-        }
-
-        // Check if the user is in a voice channel if so continue, if not end;
-        assert member != null;
-        if(!Objects.requireNonNull(member.getVoiceState()).inAudioChannel()) {
-            MessageWrapper.errorResponse(event, "Uh oh, your trail is adrift in the void! Navigate to a voice channel to realign");
-            logger.info("User " + event.getUser().getName() + " was not in a channel.");
-            return false;
-        }
-
-        // Try to join the voice channel
         try {
-            VoiceChannel userChannel = Objects.requireNonNull(member.getVoiceState().getChannel()).asVoiceChannel();
-            joinVC(userChannel);
+            String platformInput = Objects.requireNonNull(event.getOption("platform")).getAsString();
+            platformInput = platformInput.replaceAll("\\s+", "").toLowerCase();
 
-            updateActiveChannel(event.getChannel().asTextChannel());
-
-            MessageWrapper.genericResponse(event, "Stardust trail forming... entering your nebula!", userChannel.getName());
-            logger.info("Successfully joined " + userChannel.getName() + " at the request of " + event.getUser().getName() + ".");
-            return true;
-
-        } catch (Exception e) {
-            logger.warning(e.getMessage());
-            logger.warning(Arrays.toString(e.getStackTrace()));
+            platform = switch (platformInput) {
+                case "spotify" -> Platform.SPOTIFY;
+                case "soundcloud" -> Platform.SOUNDCLOUD;
+                case "youtube" -> Platform.YOUTUBE;
+                default -> Platform.ERROR;
+            };
+        } catch (Exception ignore) {
         }
 
-        MessageWrapper.errorResponse(event, "Starlight fluctuations! Verify permissions to connect Orion's cosmic network.");
-        logger.info("There was an error joining " + event.getUser().getName() + "'s Voice channel.");
+        if (platform.equals(Platform.NULL)) {
+            platform = Platform.SPOTIFY;
+        } else if (platform.equals(Platform.ERROR)) {
+            MessageWrapper.errorResponse(event, "Invalid platform, Valid Options: Spotify, Soundcloud, Youtube");
+            return false;
+        }
 
-        return false;
+        goodURL = isValidURL(song);
+
+        if (goodURL == 2) {
+            MessageWrapper.errorResponse(event, "It looks like you provided a valid URL however it was not for a song or a platform we support, Valid Options: Spotify, Soundcloud, Youtube");
+            return false;
+        }
+
+        if (goodURL == 1) {
+            MessageWrapper.genericResponse(event, "success","Adding song to queue");
+        }
+
+        if (goodURL == 0) {
+            String[] songIDName = getURL(song, platform).split(" - ");
+            song = songIDName[0];
+            String songName = songIDName[1];
+            MessageWrapper.genericResponse(event, "success", "adding song " + songName + " to queue");
+        }
+
+        if (song == null) {
+            MessageWrapper.errorResponse(event, "There was an error while searching for the song, please try a different search term, platform or provide a direct link");
+            return false;
+        }
+
+        DatabaseWrapper wrapper = new DatabaseWrapper();
+        wrapper.addSong(Objects.requireNonNull(event.getGuild()).toString(), platform.toString(), song);
+        // add song to back of queue in database
+
+        return true;
     }
 
-    public static void joinVC(VoiceChannel voiceChannel) {
-        AudioManager audioManager = voiceChannel.getGuild().getAudioManager();
-        audioManager.openAudioConnection(voiceChannel);
+    private enum Platform {
+        SPOTIFY,
+        SOUNDCLOUD,
+        YOUTUBE,
+        NULL,
+        ERROR
     }
 
-    private static void updateActiveChannel(TextChannel textChannel) {
+    private static short isValidURL(String potentialURL) {
+        Logger logger = Logger.getLogger("orion");
 
+        try {
+            URI url = URI.create(potentialURL);
+            String domain = url.getHost();
+            if (domain.endsWith("youtube.com") || domain.endsWith("spotify.com") || domain.endsWith("soundcloud.com")) {
+                logger.info("Valid URL: " + url + " adding to queue.");
+                return 1;
+            } else {
+                logger.info("Valid URL, but unsupported");
+                return 2;
+            }
+        } catch (Exception e) {
+            logger.info("Invalid URL: " + e.getMessage());
+            return 0;
+        }
     }
 
+    private static String getURL(String searchTerm, Platform platform) {
+        return Spotify.SpotifySearch(searchTerm); // remove when added the things below
+//        return switch (platform) {
+//            case SPOTIFY -> Spotify.SpotifySearch(searchTerm);
+////            case "youtube" -> new YoutubeSearch().search(searchTerm);
+////            case "soundcloud" -> new SoundCloudSearch().search(searchTerm);
+//            default -> null;
+        };
+    }
 
-}

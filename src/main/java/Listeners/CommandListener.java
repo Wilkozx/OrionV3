@@ -14,7 +14,11 @@ public class CommandListener extends ListenerAdapter {
         logger.info("@" + Objects.requireNonNull(event.getGuild()).getName() + " #" + event.getChannel().getName() + " - " + event.getUser().getName() + ": " + event.getCommandString());
 
         if (event.getName().equalsIgnoreCase("join")) {
-            CommandFunctions.PlayCommand.joinCommand(event);
+            CommandFunctions.JoinCommand.joinCommand(event);
+        }
+
+        if (event.getName().equalsIgnoreCase("play")) {
+            CommandFunctions.PlayCommand.playCommand(event);
         }
 
     }

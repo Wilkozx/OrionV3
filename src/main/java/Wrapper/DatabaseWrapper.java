@@ -1,28 +1,19 @@
 package Wrapper;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
-import org.bson.Document;
-import org.bson.json.JsonObject;
-
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoException;
-import com.mongodb.ServerApi;
-import com.mongodb.ServerApiVersion;
+import Errors.DBConnectionException;
+import Errors.DBEmptyQueueException;
+import com.mongodb.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
-
-import Errors.DBConnectionException;
-import Errors.DBEmptyQueueException;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class DatabaseWrapper {
     private final String username = Dotenv.load().get("MongoUser");

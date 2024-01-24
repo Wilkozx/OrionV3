@@ -1,18 +1,19 @@
 import Init.CommandBuilder;
 import Listeners.CommandListener;
+import MusicSearch.Spotify;
 import io.github.cdimascio.dotenv.Dotenv;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
@@ -41,6 +42,15 @@ public class Main {
 
         CommandBuilder.BuildCommands(Orion);
 
+        // Generate Token on startup & Update Token every hour!
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                Spotify.updateAccessToken();
+            }
+        };
+        timer.scheduleAtFixedRate(task, 0, 3600000);
     }
 
 }
