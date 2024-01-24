@@ -12,8 +12,8 @@ import com.mongodb.client.model.Updates;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.Document;
 
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 public class DatabaseWrapper {
@@ -99,17 +99,21 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
 
+                Document newSong = new Document("platform", platform)
+                                        .append("songID", songID)
+                                        .append("songTitle", songTitle)
+                                        .append("artist", artist)
+                                        .append("url", url);
+
                 collection.deleteMany(new Document("guildID", guildID));
                 collection.insertOne(new Document("guildID", guildID)
-                                          .append("queue", new Document("platform", platform)
-                                                                .append("songID", songID)
-                                                                .append("songTitle", songTitle)
-                                                                .append("artist", artist)
-                                                                .append("url", url)));
+                                          .append("queue", Arrays.asList(newSong)));
                 logger.info("Success! Created Queue for guild: " + guildID);
             } catch (MongoException e) {
                 logger.warning("Error creating Queue: " + e.getMessage());
                 throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -119,7 +123,7 @@ public class DatabaseWrapper {
             try {
                 logger.info("Attempting to add song with ID: " + songID + " to queue for guild: " + guildID);
                 MongoDatabase database = mongoClient.getDatabase("guilds");
-                MongoCollection collection = database.getCollection("queue");
+                MongoCollection<Document> collection = database.getCollection("queue");
 
                 Document newSong = new Document("platform", platform)
                                         .append("songID", songID)
