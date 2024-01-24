@@ -1,6 +1,7 @@
 package CommandFunctions;
 
 import Errors.DBConnectionException;
+import Errors.DBEmptyQueueException;
 import MusicSearch.Spotify;
 import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
 
 public class PlayCommand {
 
-    public static boolean playCommand(SlashCommandInteractionEvent event) throws DBConnectionException {
+    public static boolean playCommand(SlashCommandInteractionEvent event) {
         Logger logger = Logger.getLogger("orion");
 
         event.deferReply().queue();
@@ -55,7 +56,7 @@ public class PlayCommand {
             String[] songIDName = getURL(song, platform).split(" - ");
             song = songIDName[0];
             String songName = songIDName[1];
-            MessageWrapper.genericResponse(event, "success", "adding song " + songName + " to queue");
+            MessageWrapper.genericResponse(event, "Success!", "adding song " + songName + " to queue");
         }
 
         if (song == null) {
@@ -63,11 +64,26 @@ public class PlayCommand {
             return false;
         }
 
-        DatabaseWrapper wrapper = new DatabaseWrapper();
-        wrapper.addSong(Objects.requireNonNull(event.getGuild()).toString(), platform.toString(), song);
-        // add song to back of queue in database
-
-        return true;
+        //Add the song to the database
+        try {
+            DatabaseWrapper wrapper = new DatabaseWrapper();
+            try {
+                wrapper.getQueue(event.getGuild().getId().toString());
+            } catch (DBEmptyQueueException e) {
+                logger.info("Queue not found, creating new queue...");
+                wrapper.createQueue(event.getGuild().getId().toString(), platform.toString(), song);
+                logger.info("Song successfully added to queue!");
+                return true;
+            }
+            wrapper.addSong(event.getGuild().getId().toString(), platform.toString(), song);// add song to back of queue in database
+            logger.info("Song successfully added to queue!");
+            return true;
+        } catch (DBConnectionException e) {
+            logger.warning("Error adding song to queue: " + e.getMessage());
+            MessageWrapper.errorResponse(event, "There was an error while adding the song to the queue, please try again later");
+            return false;
+        }
+        
     }
 
     private enum Platform {

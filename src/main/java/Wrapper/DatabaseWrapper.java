@@ -90,7 +90,7 @@ public class DatabaseWrapper {
         }
     }
 
-    private void createQueue(String guildID, String platform, String songID) throws DBConnectionException{
+    public void createQueue(String guildID, String platform, String songID) throws DBConnectionException{
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
@@ -110,6 +110,7 @@ public class DatabaseWrapper {
     public void addSong(String guildID, String platform, String songID) throws DBConnectionException {
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
+                logger.info("Attempting to add song with ID: " + songID + " to queue for guild: " + guildID);
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection collection = database.getCollection("queue");
 
@@ -117,6 +118,7 @@ public class DatabaseWrapper {
                     .append("songID", songID);
 
                 collection.updateOne(Filters.eq("guildID", guildID), Updates.addToSet("queue", newSong));
+                logger.info("Success! Added song with ID: " + songID + " to queue for guild: " + guildID);
             } catch (MongoException e) {
                 logger.warning("Error adding song to Queue: " + e.getMessage());
                 throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
