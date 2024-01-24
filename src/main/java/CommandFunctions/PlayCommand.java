@@ -8,6 +8,7 @@ import Wrapper.MessageWrapper;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -18,6 +19,7 @@ public class PlayCommand {
 
         event.deferReply().queue();
         String song = Objects.requireNonNull(event.getOption("song")).getAsString();
+        String[] details = new String[4];
         Platform platform = Platform.NULL;
         short goodURL;
 
@@ -53,13 +55,15 @@ public class PlayCommand {
         }
 
         if (goodURL == 0) {
-            String[] songIDName = getURL(song, platform).split(" - ");
-            song = songIDName[0];
-            String songName = songIDName[1];
-            MessageWrapper.genericResponse(event, "Success!", "adding song " + songName + " to queue");
+            details = getURL(song, platform);
+            // 0 - songID
+            // 1 - songTitle
+            // 2 - Artist
+            // 3 - URL
+            MessageWrapper.genericResponse(event, "Success!", "adding song " + details[1] + " by " + details[2] + " to queue");
         }
 
-        if (song == null) {
+        if (Arrays.equals(details, new String[4])) {
             MessageWrapper.errorResponse(event, "There was an error while searching for the song, please try a different search term, platform or provide a direct link");
             return false;
         }
@@ -71,11 +75,11 @@ public class PlayCommand {
                 wrapper.getQueue(Objects.requireNonNull(event.getGuild()).getId());
             } catch (DBEmptyQueueException e) {
                 logger.info("Queue not found, creating new queue...");
-                wrapper.createQueue(event.getGuild().getId(), platform.toString(), song);
+                wrapper.createQueue(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);
                 logger.info("Song successfully added to queue!");
                 return true;
             }
-            wrapper.addSong(event.getGuild().getId(), platform.toString(), song);// add song to back of queue in database
+            wrapper.addSong(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);// add song to back of queue in database
             logger.info("Song successfully added to queue!");
             return true;
         } catch (DBConnectionException e) {
@@ -100,7 +104,7 @@ public class PlayCommand {
         try {
             URI url = URI.create(potentialURL);
             String domain = url.getHost();
-            if (domain.endsWith("youtube.com") || domain.endsWith("spotify.com") || domain.endsWith("soundcloud.com")) {
+            if (domain.endsWith("youtube.com") || domain.endsWith("spotify.com") || domain.endsWith("soundcloud.com") || domain.endsWith("youtu.be")) {
                 logger.info("Valid URL: " + url + " adding to queue.");
                 return 1;
             } else {
@@ -113,7 +117,7 @@ public class PlayCommand {
         }
     }
 
-    private static String getURL(String searchTerm, Platform platform) {
+    private static String[] getURL(String searchTerm, Platform platform) {
         return Spotify.SpotifySearch(searchTerm); // remove when added the things below
 //        return switch (platform) {
 //            case SPOTIFY -> Spotify.SpotifySearch(searchTerm);
