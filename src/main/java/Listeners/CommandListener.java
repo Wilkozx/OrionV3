@@ -21,5 +21,9 @@ public class CommandListener extends ListenerAdapter {
             CommandFunctions.PlayCommand.playCommand(event);
         }
 
+        if (event.getName().equalsIgnoreCase("queue")) {
+            CommandFunctions.QueueCommand.queueCommand(event);
+        }
+
     }
 }
