@@ -13,7 +13,7 @@ public class CommandBuilder {
         for(Guild guild : Orion.getGuilds()) {
             logger.info("Adding commands for Guild: \"" + guild.getName() + "\" with ID: [" + guild.getId() + "]");
 
-            guild.upsertCommand("join", "joins the voice channel");
+            guild.upsertCommand("join", "joins the voice channel").queue();
             logger.info("Added command /join.");
 
             guild.upsertCommand("play", "adds a song to the back of the queue")
