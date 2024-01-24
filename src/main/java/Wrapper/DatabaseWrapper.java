@@ -49,7 +49,6 @@ public class DatabaseWrapper {
     }
 
     private MongoCollection getCollection() throws DBConnectionException{
-
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
@@ -64,6 +63,7 @@ public class DatabaseWrapper {
 
     //RETURNS AN ARRAY LIST OF DOCUMENTS IF THE QUEUE EXISTS AND THROWS A DBCONNECTIONEXCEPTION IF THE QUEUE DOES NOT EXIST
     public ArrayList<Document> getQueue(String guildID) throws DBConnectionException, DBEmptyQueueException{
+        logger.info("Attempting to get Queue for guild: " + guildID);
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
@@ -76,11 +76,13 @@ public class DatabaseWrapper {
                     if (queue.get(0).isEmpty()) {
                         throw new DBEmptyQueueException("Queue is empty or does not exist.");
                     }
+                    logger.info("Success! Got Queue for guild: " + guildID);
                     return queue;
                 } catch (Exception e) {
                     throw new DBEmptyQueueException("Queue is empty or does not exist.");
                 }
             } catch (DBEmptyQueueException e) {
+                logger.info(guildID + " does not have a queue, you should create one.");
                 throw new DBEmptyQueueException("Queue is empty or does not exist.");
             } catch (Exception e) {
                 logger.warning("Error getting Queue: " + e.getMessage());
@@ -90,15 +92,17 @@ public class DatabaseWrapper {
     }
 
     public void createQueue(String guildID, String platform, String songID) throws DBConnectionException{
+        logger.info("Attempting to create Queue for guild: " + guildID);
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
-                MongoCollection collection = database.getCollection("queue");
+                MongoCollection<Document> collection = database.getCollection("queue");
 
                 collection.deleteMany(new Document("guildID", guildID));
                 collection.insertOne(new Document("guildID", guildID)
-                    .append("queue", new Document("platform", platform)
-                        .append("songID", songID)));
+                                          .append("queue", new Document("platform", platform)
+                                                                .append("songID", songID)));
+                logger.info("Success! Created Queue for guild: " + guildID);
             } catch (MongoException e) {
                 logger.warning("Error creating Queue: " + e.getMessage());
                 throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
