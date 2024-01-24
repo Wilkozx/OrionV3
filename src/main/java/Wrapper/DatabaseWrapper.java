@@ -12,6 +12,7 @@ import com.mongodb.client.model.Updates;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.bson.Document;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -91,7 +92,7 @@ public class DatabaseWrapper {
         }
     }
 
-    public void createQueue(String guildID, String platform, String songID) throws DBConnectionException{
+    public void createQueue(String guildID, String platform, String songID, String songTitle, String artist, String url) throws DBConnectionException{
         logger.info("Attempting to create Queue for guild: " + guildID);
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
@@ -101,7 +102,10 @@ public class DatabaseWrapper {
                 collection.deleteMany(new Document("guildID", guildID));
                 collection.insertOne(new Document("guildID", guildID)
                                           .append("queue", new Document("platform", platform)
-                                                                .append("songID", songID)));
+                                                                .append("songID", songID)
+                                                                .append("songTitle", songTitle)
+                                                                .append("artist", artist)
+                                                                .append("url", url)));
                 logger.info("Success! Created Queue for guild: " + guildID);
             } catch (MongoException e) {
                 logger.warning("Error creating Queue: " + e.getMessage());
@@ -110,7 +114,7 @@ public class DatabaseWrapper {
         }
     }
 
-    public void addSong(String guildID, String platform, String songID) throws DBConnectionException {
+    public void addSong(String guildID, String platform, String songID, String songTitle, String artist, String url) throws DBConnectionException {
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
                 logger.info("Attempting to add song with ID: " + songID + " to queue for guild: " + guildID);
@@ -118,7 +122,10 @@ public class DatabaseWrapper {
                 MongoCollection collection = database.getCollection("queue");
 
                 Document newSong = new Document("platform", platform)
-                    .append("songID", songID);
+                                        .append("songID", songID)
+                                        .append("songTitle", songTitle)
+                                        .append("artist", artist)
+                                        .append("url", url);
 
                 collection.updateOne(Filters.eq("guildID", guildID), Updates.addToSet("queue", newSong));
                 logger.info("Success! Added song with ID: " + songID + " to queue for guild: " + guildID);
