@@ -2,9 +2,13 @@ package CommandFunctions;
 
 import Errors.DBConnectionException;
 import Errors.DBEmptyQueueException;
+import MusicPlayer.GuildMusicManager;
+import MusicPlayer.PlayerManager;
 import MusicSearch.Spotify;
 import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.net.URI;
@@ -22,6 +26,7 @@ public class PlayCommand {
         String[] details = new String[4];
         Platform platform = Platform.NULL;
         short goodURL;
+
 
         try {
             String platformInput = Objects.requireNonNull(event.getOption("platform")).getAsString();
@@ -68,26 +73,55 @@ public class PlayCommand {
             return false;
         }
 
-        //Add the song to the database
-        try {
-            DatabaseWrapper wrapper = new DatabaseWrapper();
-            try {
-                wrapper.getQueue(Objects.requireNonNull(event.getGuild()).getId());
-            } catch (DBEmptyQueueException e) {
-                logger.info("Queue not found, creating new queue...");
-                wrapper.createQueue(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);
-                logger.info("Song successfully added to queue!");
-                return true;
-            }
-            wrapper.addSong(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);// add song to back of queue in database
-            logger.info("Song successfully added to queue!");
-            return true;
-        } catch (DBConnectionException e) {
-            logger.warning("Error adding song to queue: " + e.getMessage());
-            MessageWrapper.errorResponse(event, "There was an error while adding the song to the queue, please try again later");
+//        Add the song to the database
+//        try {
+//            DatabaseWrapper wrapper = new DatabaseWrapper();
+//            try {
+//                wrapper.getQueue(Objects.requireNonNull(event.getGuild()).getId());
+//            } catch (DBEmptyQueueException e) {
+//                logger.info("Queue not found, creating new queue...");
+//                wrapper.createQueue(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);
+//                logger.info("Song successfully added to queue!");
+//                return true;
+//            }
+//            wrapper.addSong(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);// add song to back of queue in database
+//            logger.info("Song successfully added to queue!");
+//            return true;
+//        } catch (DBConnectionException e) {
+//            logger.warning("Error adding song to queue: " + e.getMessage());
+//            MessageWrapper.errorResponse(event, "There was an error while adding the song to the queue, please try again later");
+//            return false;
+//        }
+
+        Member member = event.getMember();
+        assert member != null;
+        GuildVoiceState memberVoiceState = member.getVoiceState();
+
+        assert memberVoiceState != null;
+        if(!memberVoiceState.inAudioChannel()) {
+            event.reply("You need to be in a voice channel").queue();
             return false;
         }
-        
+
+        Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
+        GuildVoiceState selfVoiceState = self.getVoiceState();
+
+        assert selfVoiceState != null;
+        if(!selfVoiceState.inAudioChannel()) {
+            event.getGuild().getAudioManager().openAudioConnection(memberVoiceState.getChannel());
+        } else {
+            if (selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
+                event.reply("need to be in the same channel").queue();
+                return false;
+            }
+        }
+
+        PlayerManager playerManager = PlayerManager.get();
+        MessageWrapper.genericResponse(event, "Playing song " + details[1], "by " + details[2]);
+        String youtubeURL = "https://www.youtube.com/watch?v=F57P9C4SAW4";
+        playerManager.play(event.getGuild(), youtubeURL);
+
+        return false;
     }
 
     private enum Platform {
