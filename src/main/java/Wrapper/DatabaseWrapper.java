@@ -54,7 +54,6 @@ public class DatabaseWrapper {
             try {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection collection = database.getCollection("queue");
-                System.out.println(collection.find(new Document("guildID", "446352184351653919")).first());
                 return collection;
             } catch (MongoException e) {
                 logger.warning("Error connecting to MongoDB: " + e.getMessage());
