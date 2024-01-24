@@ -68,14 +68,14 @@ public class PlayCommand {
         try {
             DatabaseWrapper wrapper = new DatabaseWrapper();
             try {
-                wrapper.getQueue(event.getGuild().getId().toString());
+                wrapper.getQueue(Objects.requireNonNull(event.getGuild()).getId());
             } catch (DBEmptyQueueException e) {
                 logger.info("Queue not found, creating new queue...");
-                wrapper.createQueue(event.getGuild().getId().toString(), platform.toString(), song);
+                wrapper.createQueue(event.getGuild().getId(), platform.toString(), song);
                 logger.info("Song successfully added to queue!");
                 return true;
             }
-            wrapper.addSong(event.getGuild().getId().toString(), platform.toString(), song);// add song to back of queue in database
+            wrapper.addSong(event.getGuild().getId(), platform.toString(), song);// add song to back of queue in database
             logger.info("Song successfully added to queue!");
             return true;
         } catch (DBConnectionException e) {
