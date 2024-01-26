@@ -176,7 +176,7 @@ public class DatabaseWrapper {
                 Document result = collection.find(guildQuery).limit(1).first();
 
                 ArrayList<Document> queue = (ArrayList<Document>) result.get("queue");
-
+                logger.info("Success! Peeked song from queue for guild: " + guildID);
                 return (Document) queue.get(0);
             } catch(Exception e) {
                 throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
