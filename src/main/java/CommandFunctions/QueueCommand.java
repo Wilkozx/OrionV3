@@ -51,7 +51,7 @@ public class QueueCommand {
                               .append("\n");
             }
 
-            MessageWrapper.genericResponse(event, "Current queue", String.valueOf(stringBuilder2));
+            MessageWrapper.genericResponse(event, "🎵 Current queue 🎵", String.valueOf(stringBuilder2));
             return true;
         } catch (DBEmptyQueueException | DBConnectionException e) {
             MessageWrapper.errorResponse(event, "Error " + e.getMessage());
