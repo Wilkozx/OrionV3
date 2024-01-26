@@ -140,4 +140,28 @@ public class DatabaseWrapper {
         }
     }
 
+    public Document popNextSong(String guildID) throws DBEmptyQueueException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to pop next song from queue for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document result = collection.find(guildQuery).first();
+
+                ArrayList<Document> queue = (ArrayList<Document>) result.get("queue");
+
+                Document song = (Document) queue.get(0);
+
+                Document updateQuery = new Document("$pull", new Document("queue", song));
+                
+                Long modified = collection.updateOne(guildQuery, updateQuery).getModifiedCount();
+                logger.info(guildID + " queue modified, removed: " + modified);
+                return song;
+            } catch(Exception e) {
+                throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
+            }
+        }
+    }
 }
