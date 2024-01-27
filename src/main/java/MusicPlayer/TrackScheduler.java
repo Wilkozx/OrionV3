@@ -28,6 +28,22 @@ public class TrackScheduler extends AudioEventAdapter {
         }
     }
 
+    public void pause() {
+        player.setPaused(true);
+    }
+
+    public void resume() {
+        player.setPaused(false);
+    }
+
+    public void stop() {
+        player.stopTrack();
+    }
+
+    public AudioTrack getPlaying() {
+        return player.getPlayingTrack();
+    }
+
     public AudioPlayer getPlayer() {
         return player;
     }

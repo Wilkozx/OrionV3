@@ -41,6 +41,7 @@ public class PlayerManager {
     public void play(Guild guild, String trackURL) {
         GuildMusicManager guildMusicManager = getGuildMusicManager(guild);
         audioPlayerManager.loadItemOrdered(guildMusicManager, trackURL, new AudioLoadResultHandler() {
+
             @Override
             public void trackLoaded(AudioTrack audioTrack) {
                 guildMusicManager.getTrackScheduler().queue(audioTrack);
@@ -48,7 +49,6 @@ public class PlayerManager {
 
             @Override
             public void playlistLoaded(AudioPlaylist audioPlaylist) {
-
             }
 
             @Override
@@ -62,6 +62,5 @@ public class PlayerManager {
             }
         });
     }
-
 
 }
