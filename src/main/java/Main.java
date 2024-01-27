@@ -41,6 +41,8 @@ public class Main {
                 .build().awaitReady();
 
         CommandBuilder.BuildCommands(Orion);
+//        Orion.addEventListener(new DisconnectListener());
+//        Orion.addEventListener(new GuildJoin());
 
         // Generate Token on startup & Update Token every hour!
         Timer timer = new Timer();

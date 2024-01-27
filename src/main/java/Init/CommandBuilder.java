@@ -24,6 +24,16 @@ public class CommandBuilder {
             guild.upsertCommand("queue", "shows you the current queue").queue();
             logger.info("Added command /queue.");
 
+            guild.upsertCommand("pause", "pauses the current track").queue();
+            logger.info("Added command /pause.");
+
+            guild.upsertCommand("resume", "resumes the paused track").queue();
+            logger.info("Added command /resume.");
+
+            guild.upsertCommand("skip", "skips the current track").queue();
+            logger.info("Added command /skip");
+
+
         }
     }
 }

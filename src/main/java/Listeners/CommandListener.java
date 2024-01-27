@@ -25,5 +25,18 @@ public class CommandListener extends ListenerAdapter {
             CommandFunctions.QueueCommand.queueCommand(event);
         }
 
+        if (event.getName().equalsIgnoreCase("pause")) {
+            CommandFunctions.PauseCommand.pauseCommand(event);
+        }
+
+        if (event.getName().equalsIgnoreCase("resume")) {
+            CommandFunctions.ResumeCommand.resumeCommand(event);
+        }
+
+        if (event.getName().equalsIgnoreCase("skip")) {
+            CommandFunctions.SkipCommand.skipCommand(event);
+        }
+
+
     }
 }

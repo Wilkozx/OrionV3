@@ -18,13 +18,6 @@ public class JoinCommand {
         event.deferReply().queue();
         Member member = event.getMember();
 
-        // Check if the bot is already connected in a channel if so end;
-        if(Objects.requireNonNull(event.getGuild()).getAudioManager().isConnected()) {
-            MessageWrapper.errorResponse(event, "Orion occupies another nebula! Choose a different voice channel for stellar conversation.");
-            logger.info("User " + event.getUser().getName() + " tried to use /join, however already connected in a channel.");
-            return false;
-        }
-
         // Check if the user is in a voice channel if so continue, if not end;
         assert member != null;
         if(!Objects.requireNonNull(member.getVoiceState()).inAudioChannel()) {
