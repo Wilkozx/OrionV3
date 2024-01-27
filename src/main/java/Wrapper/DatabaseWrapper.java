@@ -155,9 +155,9 @@ public class DatabaseWrapper {
                 Document song = (Document) queue.get(0);
 
                 Document updateQuery = new Document("$pull", new Document("queue", song));
-                
-                Long modified = collection.updateOne(guildQuery, updateQuery).getModifiedCount();
-                logger.info(guildID + " queue modified, removed: " + modified);
+                collection.updateOne(guildQuery, updateQuery);
+
+                logger.info(guildID + " queue modified, removed: " + song.get("songTitle"));
                 return song;
             } catch(Exception e) {
                 throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
@@ -173,11 +173,36 @@ public class DatabaseWrapper {
                 MongoCollection<Document> collection = database.getCollection("queue");
                 
                 Document guildQuery = new Document("guildID", guildID);
-                Document result = collection.find(guildQuery).limit(1).first();
+                Document result = collection.find(guildQuery).first();
 
                 ArrayList<Document> queue = (ArrayList<Document>) result.get("queue");
                 logger.info("Success! Peeked song from queue for guild: " + guildID);
                 return (Document) queue.get(0);
+            } catch(Exception e) {
+                throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
+            }
+        }
+    }
+
+    public Document removeSong(String guildID, int index) throws DBEmptyQueueException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to pop next song from queue for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document result = collection.find(guildQuery).first();
+
+                ArrayList<Document> queue = (ArrayList<Document>) result.get("queue");
+
+                Document song = (Document) queue.get(index - 1);
+
+                Document updateQuery = new Document("$pull", new Document("queue", song));
+                collection.updateOne(guildQuery, updateQuery);
+
+                logger.info(guildID + " queue modified, removed: " + song.get("songTitle"));
+                return song;
             } catch(Exception e) {
                 throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
             }
