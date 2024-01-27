@@ -49,19 +49,6 @@ public class DatabaseWrapper {
         }
     }
 
-    private MongoCollection getCollection() throws DBConnectionException{
-        try (MongoClient mongoClient = MongoClients.create(settings)) {
-            try {
-                MongoDatabase database = mongoClient.getDatabase("guilds");
-                MongoCollection collection = database.getCollection("queue");
-                return collection;
-            } catch (MongoException e) {
-                logger.warning("Error connecting to MongoDB: " + e.getMessage());
-                throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
-            }
-        }
-    }
-
     //RETURNS AN ARRAY LIST OF DOCUMENTS IF THE QUEUE EXISTS AND THROWS A DBCONNECTIONEXCEPTION IF THE QUEUE DOES NOT EXIST
     public ArrayList<Document> getQueue(String guildID) throws DBConnectionException, DBEmptyQueueException{
         logger.info("Attempting to get Queue for guild: " + guildID);
