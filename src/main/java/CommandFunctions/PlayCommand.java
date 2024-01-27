@@ -154,7 +154,8 @@ public class PlayCommand {
         }
     }
 
-    private static void syncBotToUserChannel(SlashCommandInteractionEvent event, GuildVoiceState memberVoiceState) {
+    // eventually move this with the additional checks elsewhere but for now this is fine
+    public static void syncBotToUserChannel(SlashCommandInteractionEvent event, GuildVoiceState memberVoiceState) {
         Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
         GuildVoiceState selfVoiceState = self.getVoiceState();
 

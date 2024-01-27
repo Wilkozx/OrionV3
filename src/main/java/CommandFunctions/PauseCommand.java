@@ -22,11 +22,24 @@ public class PauseCommand {
             return false;
         }
 
-        // if queue empty reply with 'nothing to pause'
-
         PlayerManager playerManager = PlayerManager.get();
         Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
         GuildVoiceState selfVoiceState = self.getVoiceState();
+
+        // added
+        assert selfVoiceState != null;
+        if (!selfVoiceState.inAudioChannel()) {
+            PlayCommand.syncBotToUserChannel(event, memberVoiceState);
+        }
+
+        if (selfVoiceState.inAudioChannel()) {
+            if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
+                event.reply("You need to be in the same channel to pause a song").queue();
+                return false;
+            }
+        }
+
+        // if queue empty reply with 'nothing to pause'
 
         // second check - is the bot in a voice channel? if not join the user and pause;
         assert selfVoiceState != null;

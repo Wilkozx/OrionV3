@@ -22,6 +22,23 @@ public class ResumeCommand {
             return false;
         }
 
+        PlayerManager playerManager = PlayerManager.get();
+        Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
+        GuildVoiceState selfVoiceState = self.getVoiceState();
+
+        // added
+        assert selfVoiceState != null;
+        if (!selfVoiceState.inAudioChannel()) {
+            PlayCommand.syncBotToUserChannel(event, memberVoiceState);
+        }
+
+        if (selfVoiceState.inAudioChannel()) {
+            if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
+                event.reply("You need to be in the same channel to resume a song").queue();
+                return false;
+            }
+        }
+
         // if queue empty reply with 'nothing to resume'
 
         PlayerManager playerManager = PlayerManager.get();
