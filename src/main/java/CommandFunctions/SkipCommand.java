@@ -27,29 +27,25 @@ public class SkipCommand {
         Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
         GuildVoiceState selfVoiceState = self.getVoiceState();
 
-
         // second check - is the bot in a voice channel? if not join the user and skip;
         assert selfVoiceState != null;
         if (!selfVoiceState.inAudioChannel()) {
             event.getGuild().getAudioManager().openAudioConnection(memberVoiceState.getChannel());
             MessageWrapper.genericResponse(event, "Joined & Skipped", "Track by Artist");
             playerManager.getGuildMusicManager(event.getGuild()).getTrackScheduler().stop();
-            CommandFunctions.PlayCommand.playLatest(event.getGuild());
             return true;
         }
 
         // third check - if the bot is already in a channel then check if it's the same as the user execute; if not tell them off;
-        if (selfVoiceState.inAudioChannel()) {
-            if (selfVoiceState.getChannel() == memberVoiceState.getChannel()) {
-                MessageWrapper.genericResponse(event, "Skipped", "Track by Artist");
-                playerManager.getGuildMusicManager(event.getGuild()).getTrackScheduler().stop();
-                CommandFunctions.PlayCommand.playLatest(event.getGuild());
-            } else {
-                MessageWrapper.errorResponse(event, "Orion is currently in another channel");
-            }
+        if (selfVoiceState.getChannel() == memberVoiceState.getChannel()) {
+            MessageWrapper.genericResponse(event, "Skipped", "Track by Artist");
+            playerManager.getGuildMusicManager(event.getGuild()).getTrackScheduler().stop();
             return true;
+        } else {
+            MessageWrapper.errorResponse(event, "Orion is currently in another channel");
+            return false;
+
         }
 
-        return false;
     }
 }
