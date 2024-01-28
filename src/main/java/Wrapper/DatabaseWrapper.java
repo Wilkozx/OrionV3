@@ -79,7 +79,7 @@ public class DatabaseWrapper {
         }
     }
 
-    public void createQueue(String guildID, String platform, String songID, String songTitle, String artist, String url) throws DBConnectionException{
+    public void createQueue(String guildID, String platform, String songTitle, String artist, String url) throws DBConnectionException{
         logger.info("Attempting to create Queue for guild: " + guildID);
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
@@ -87,7 +87,6 @@ public class DatabaseWrapper {
                 MongoCollection<Document> collection = database.getCollection("queue");
 
                 Document newSong = new Document("platform", platform)
-                                        .append("songID", songID)
                                         .append("songTitle", songTitle)
                                         .append("artist", artist)
                                         .append("url", url);
@@ -105,21 +104,20 @@ public class DatabaseWrapper {
         }
     }
 
-    public void addSong(String guildID, String platform, String songID, String songTitle, String artist, String url) throws DBConnectionException {
+    public void addSong(String guildID, String platform, String songTitle, String artist, String url) throws DBConnectionException {
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
-                logger.info("Attempting to add song with ID: " + songID + " to queue for guild: " + guildID);
+                logger.info("Attempting to add song with ID: " + url + " to queue for guild: " + guildID);
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
 
                 Document newSong = new Document("platform", platform)
-                                        .append("songID", songID)
                                         .append("songTitle", songTitle)
                                         .append("artist", artist)
                                         .append("url", url);
 
                 collection.updateOne(Filters.eq("guildID", guildID), Updates.push("queue", newSong));
-                logger.info("Success! Added song with ID: " + songID + " to queue for guild: " + guildID);
+                logger.info("Success! Added song with URL: " + url + " to queue for guild: " + guildID);
             } catch (MongoException e) {
                 logger.warning("Error adding song to Queue: " + e.getMessage());
                 throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
