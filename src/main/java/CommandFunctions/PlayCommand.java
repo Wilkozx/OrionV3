@@ -218,8 +218,7 @@ public class PlayCommand {
 
                 playerManager.play(guild, songUrl);
                 return true;
-            } catch (DBEmptyQueueException | DBConnectionException e) {
-                throw new RuntimeException(e);
+            } catch (DBEmptyQueueException | DBConnectionException ignore) {
             }
         } else {
             return false;
