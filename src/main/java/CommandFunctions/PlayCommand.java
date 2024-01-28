@@ -4,6 +4,7 @@ import Errors.DBConnectionException;
 import Errors.DBEmptyQueueException;
 import MusicPlayer.PlayerManager;
 import MusicSearch.SoundCloud;
+import MusicSearch.Spotify;
 import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
 import net.dv8tion.jda.api.entities.Guild;
@@ -98,6 +99,12 @@ public class PlayCommand {
                 }
             }
 
+            if (domain.endsWith("spotify.com")) {
+                String[] songDetails;
+                songDetails = Spotify.interpretSpotifyLink(song);
+                details = getURL(songDetails[0] + " " + songDetails[1], platform);
+            }
+
         }
 
         if (goodURL == 0) {
@@ -132,8 +139,6 @@ public class PlayCommand {
                 if (!passed) {
                     MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + "to the back of the queue;");
                 }
-
-
                 return true;
             }
 

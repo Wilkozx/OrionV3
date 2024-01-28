@@ -9,14 +9,13 @@ import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
+import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Spotify {
@@ -38,7 +37,29 @@ public class Spotify {
     public Spotify() {
     }
 
-    public static String[] SpotifySearch(String searchTerm) {
+    public static String[] interpretSpotifyLink(String url) {
+        String[] searchDetails = new String[2];
+
+        List<String> parts = List.of(url.split("/"));
+        String urlID = parts.get(4);
+
+        GetTrackRequest searchRequest = spotifyApi.getTrack(urlID)
+                .build();
+        try {
+            // 0 - songTitle
+            // 1 - Artist
+            final Track track = searchRequest.execute();
+            searchDetails[0] = track.getName();
+            searchDetails[1] = Arrays.stream(track.getArtists()).findFirst().get().getName();
+            logger.info("Found song with details: \n" + Arrays.toString(searchDetails));
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            logger.warning("Error " + e.getMessage());
+        }
+
+        return searchDetails;
+    }
+
+    public static String[] searchSpotify(String searchTerm) {
 
         String[] details = new String[4];
 
@@ -56,7 +77,6 @@ public class Spotify {
             details[0] = Arrays.stream(trackPaging.getItems()).findFirst().get().getId();
             details[1] = Arrays.stream(trackPaging.getItems()).findFirst().get().getName();
             details[2] = Arrays.stream(Arrays.stream(trackPaging.getItems()).findFirst().get().getArtists()).findFirst().get().getName();
-            details[3] = "https://open.spotify.com/track/" + details[0];
             logger.info("Found song with details: \n" + Arrays.toString(details));
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             logger.warning("Error " + e.getMessage());
