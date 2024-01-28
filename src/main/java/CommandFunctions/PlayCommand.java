@@ -127,7 +127,7 @@ public class PlayCommand {
                 wrapper.getQueue(Objects.requireNonNull(event.getGuild()).getId());
             } catch (DBEmptyQueueException e) {
                 logger.info("Queue not found, creating new queue...");
-                wrapper.createQueue(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);
+                wrapper.createQueue(event.getGuild().getId(), platform.toString(), details[1], details[2], details[3]);
                 logger.info("Song successfully added to queue!");
 
                 boolean passed = playLatest(event.getGuild());
@@ -141,7 +141,7 @@ public class PlayCommand {
                 return true;
             }
 
-            wrapper.addSong(event.getGuild().getId(), platform.toString(), details[0], details[1], details[2], details[3]);// add song to back of queue in database
+            wrapper.addSong(event.getGuild().getId(), platform.toString(), details[1], details[2], details[3]);// add song to back of queue in database
             logger.info("Song successfully added to queue!");
 
             if (playLatest(event.getGuild())) {
