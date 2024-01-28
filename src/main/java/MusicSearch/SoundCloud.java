@@ -41,7 +41,7 @@ public class SoundCloud {
                 if(!jsonObject.get("policy").toString().contains("SNIP")) {
                     String title = jsonObject.get("title").getAsString();
                     String url = jsonObject.get("permalink_url").getAsString();
-                    String artist = jsonObject.get("user").getAsJsonObject().get("username").toString();
+                    String artist = jsonObject.get("user").getAsJsonObject().get("username").getAsString();
                     // 0 - songID
                     // 1 - songTitle
                     // 2 - Artist (here replaced with title as soundcloud doesn't have an artist option)
@@ -55,8 +55,8 @@ public class SoundCloud {
                     i = 4;
                 } else {
                     String tempTitle = jsonObject.get("title").getAsString();
-                    String tempArtist = jsonObject.get("user").getAsJsonObject().get("username").toString();
-                    System.out.println(jsonObject.get("policy").toString());
+                    String tempArtist = jsonObject.get("user").getAsJsonObject().get("username").getAsString();
+                    System.out.println(jsonObject.get("policy").getAsString());
                     skippedTracks.put(tempTitle, tempArtist);
                     timesSkipped++;
                     i++;

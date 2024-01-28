@@ -131,14 +131,13 @@ public class PlayCommand {
                 logger.info("Song successfully added to queue!");
 
                 boolean passed = playLatest(event.getGuild());
-
                 if (passed) {
                     MessageWrapper.genericResponse(event, "Playing Song " + details[1], "by " + details[2]);
                 }
-
                 if (!passed) {
-                    MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + "to the back of the queue;");
+                    MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the back of the queue;");
                 }
+
                 return true;
             }
 
@@ -148,7 +147,7 @@ public class PlayCommand {
             if (playLatest(event.getGuild())) {
                 MessageWrapper.genericResponse(event, "Playing Song " + details[1], "by " + details[2]);
             } else {
-                MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + "to the back of the queue;");
+                MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the back of the queue;");
             }
 
             return true;
