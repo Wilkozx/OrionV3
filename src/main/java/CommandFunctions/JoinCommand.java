@@ -32,9 +32,9 @@ public class JoinCommand {
             joinVC(userChannel);
 
             updateActiveChannel(event.getChannel().asTextChannel());
-
             MessageWrapper.genericResponse(event, "Stardust trail forming... entering your nebula!", userChannel.getName());
             logger.info("Successfully joined " + userChannel.getName() + " at the request of " + event.getUser().getName() + ".");
+            PlayCommand.playLatest(event.getGuild());
             return true;
 
         } catch (Exception e) {
