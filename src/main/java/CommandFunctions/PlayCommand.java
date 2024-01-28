@@ -84,7 +84,7 @@ public class PlayCommand {
             String domain = url.getHost();
 
             // later make this a interpretURL function
-            if (domain.endsWith("youtube") || domain.endsWith("youtu.be")) {
+            if (domain.endsWith("youtube.com") || domain.endsWith("youtu.be.com")) {
                 if (song.contains("playlist")) {
                     platform = Platform.YOUTUBE;
 
