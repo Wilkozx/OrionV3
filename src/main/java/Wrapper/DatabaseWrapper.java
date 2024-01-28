@@ -91,9 +91,7 @@ public class DatabaseWrapper {
                                         .append("artist", artist)
                                         .append("url", url);
 
-                collection.deleteMany(new Document("guildID", guildID));
-                collection.insertOne(new Document("guildID", guildID)
-                                          .append("queue", Arrays.asList(newSong)));
+                collection.updateOne(new Document("guildID", guildID), new Document("queue", Arrays.asList(newSong)));
                 logger.info("Success! Created Queue for guild: " + guildID);
             } catch (MongoException e) {
                 logger.warning("Error creating Queue: " + e.getMessage());

@@ -30,9 +30,7 @@ public class SkipCommand {
         // second check - is the bot in a voice channel? if not join the user and skip;
         assert selfVoiceState != null;
         if (!selfVoiceState.inAudioChannel()) {
-            event.getGuild().getAudioManager().openAudioConnection(memberVoiceState.getChannel());
-            MessageWrapper.genericResponse(event, "Joined & Skipped", "Track by Artist");
-            playerManager.getGuildMusicManager(event.getGuild()).getTrackScheduler().stop();
+            MessageWrapper.errorResponse(event, "I am not currently in a voice channel, please join a voice channel and try again.");
             return true;
         }
 
