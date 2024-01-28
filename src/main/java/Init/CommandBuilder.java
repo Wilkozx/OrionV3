@@ -6,11 +6,21 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.util.logging.Logger;
 
+import Wrapper.DatabaseWrapper;
+
 public class CommandBuilder {
     public static void BuildCommands(JDA Orion) {
         Logger logger = Logger.getLogger("orion");
 
         for(Guild guild : Orion.getGuilds()) {
+            
+            try {
+                DatabaseWrapper db = new DatabaseWrapper();
+                db.initGuild(guild.getId());
+            } catch (Exception e) {
+                logger.warning("Error initializing guild: " + e.getMessage());
+            }
+
             logger.info("Adding commands for Guild: \"" + guild.getName() + "\" with ID: [" + guild.getId() + "]");
 
             guild.upsertCommand("join", "joins the voice channel").queue();

@@ -49,6 +49,63 @@ public class DatabaseWrapper {
         }
     }
 
+    public void initGuild(String guildID) throws DBConnectionException {
+        logger.info("Attempting to init guild: " + guildID);
+        if (guildExists(guildID)) {
+            logger.info("Guild already exists: " + guildID);
+            return;
+        }
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+
+                Document defaultSettings = new Document("volume", 100)
+                                                .append("loop", false)
+                                                .append("shuffle", false)
+                                                .append("autoplay", false)
+                                                .append("repeat", false)
+                                                .append("defaultPlatform", "SOUNDCLOUD")
+                                                .append("status", "DEFAULT");
+                Document guild = new Document("guildID", guildID)
+                                      .append("queue", Arrays.asList(new Document()))
+                                      .append("nowPlaying", new Document())
+                                      .append("settings", defaultSettings)
+                                      .append("activeChannel", "");
+
+                collection.insertOne(guild);
+                logger.info("Success! Init guild: " + guildID);
+            } catch (MongoException e) {
+                logger.warning("Error initing guild: " + e.getMessage());
+                throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
+            }
+        }
+    }
+
+    public boolean guildExists(String guildID) throws DBConnectionException {
+        logger.info("Checking if guild exists: " + guildID);
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection collection = database.getCollection("queue");
+
+                Document result =(Document) collection.find(new Document("guildID", guildID)).first();
+
+                if (result.get("guildID").equals(guildID)) {
+                    logger.info("Guild exists: " + guildID);
+                    return true;
+                } else {
+                    logger.info("Guild does not exist: " + guildID);
+                    return false;
+                }
+            } catch (Exception e) {
+                logger.info("Guild does not exist, creating now...");
+                return false;
+            }
+        }
+    }
+
+
     //RETURNS AN ARRAY LIST OF DOCUMENTS IF THE QUEUE EXISTS AND THROWS A DBCONNECTIONEXCEPTION IF THE QUEUE DOES NOT EXIST
     public ArrayList<Document> getQueue(String guildID) throws DBConnectionException, DBEmptyQueueException{
         logger.info("Attempting to get Queue for guild: " + guildID);
@@ -91,8 +148,10 @@ public class DatabaseWrapper {
                                         .append("artist", artist)
                                         .append("url", url);
 
-                collection.updateOne(new Document("guildID", guildID), new Document("queue", Arrays.asList(newSong)));
+                collection.updateOne(Filters.eq("guildID", guildID), Updates.unset("queue"));
+                collection.updateOne(Filters.eq("guildID", guildID), Updates.set("queue", Arrays.asList(newSong)));
                 logger.info("Success! Created Queue for guild: " + guildID);
+                logger.info("Added song " + songTitle + " with URL: " + url);
             } catch (MongoException e) {
                 logger.warning("Error creating Queue: " + e.getMessage());
                 throw new DBConnectionException("Error accessing the queue collection: \n" + e.getMessage() + "\nPlease check your MongoDB database.");
