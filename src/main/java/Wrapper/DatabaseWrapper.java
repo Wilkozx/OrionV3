@@ -118,7 +118,7 @@ public class DatabaseWrapper {
                                         .append("artist", artist)
                                         .append("url", url);
 
-                collection.updateOne(Filters.eq("guildID", guildID), Updates.addToSet("queue", newSong));
+                collection.updateOne(Filters.eq("guildID", guildID), Updates.push("queue", newSong));
                 logger.info("Success! Added song with ID: " + songID + " to queue for guild: " + guildID);
             } catch (MongoException e) {
                 logger.warning("Error adding song to Queue: " + e.getMessage());
