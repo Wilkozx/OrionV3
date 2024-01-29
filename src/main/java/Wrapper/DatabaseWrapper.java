@@ -258,7 +258,6 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
                 
-                Document updateQuery = new Document("$set", new Document("activeChannel", channelID));
                 long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("activeChannel", channelID)).getModifiedCount();
                 logger.info("Success! set active channel for guild " + channelID + " to " + channelID + ", rows modified: " + modCount);
             } catch(Exception e) {
@@ -293,12 +292,29 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
                 
-                Document guildQuery = new Document("guildID", guildID);
-                Document updateQuery = new Document("$set", new Document("nowPlaying", song));
-                collection.updateOne(guildQuery, updateQuery);
-                logger.info("Success! Set now playing for guild: " + guildID);
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying", song)).getModifiedCount();
+                logger.info("Success! Set now playing for guild " + guildID + " to song " + song.get("songTitle") + ", rows modified: " + modCount);
             } catch(Exception e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public Document getNowPlaying(String guildID) throws DBEmptyQueueException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to get now playing for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document result = collection.find(guildQuery).first();
+
+                Document nowPlaying = (Document) result.get("nowPlaying");
+                logger.info("Success! Got now playing for guild: " + guildID);
+                return nowPlaying;
+            } catch(Exception e) {
+                throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
             }
         }
     }
