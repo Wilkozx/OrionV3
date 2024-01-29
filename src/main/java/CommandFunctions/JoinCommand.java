@@ -1,5 +1,7 @@
 package CommandFunctions;
 
+import Errors.DBConnectionException;
+import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -34,6 +36,13 @@ public class JoinCommand {
             updateActiveChannel(event.getChannel().asTextChannel());
             MessageWrapper.genericResponse(event, "Stardust trail forming... entering your nebula!", userChannel.getName());
             logger.info("Successfully joined " + userChannel.getName() + " at the request of " + event.getUser().getName() + ".");
+
+            try {
+                new DatabaseWrapper().setActiveChannel(Objects.requireNonNull(event.getGuild()).getId(), event.getChannelId());
+            } catch (DBConnectionException e) {
+                throw new RuntimeException(e);
+            }
+
             PlayCommand.playLatest(event.getGuild());
             return true;
 

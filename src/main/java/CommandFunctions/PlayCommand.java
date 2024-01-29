@@ -10,6 +10,7 @@ import Wrapper.MessageWrapper;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.bson.Document;
 
@@ -39,6 +40,12 @@ public class PlayCommand {
         assert selfVoiceState != null;
         if (!selfVoiceState.inAudioChannel()) {
             syncBotToUserChannel(event, memberVoiceState);
+
+            try {
+                new DatabaseWrapper().setActiveChannel(event.getGuild().getId(), event.getChannelId());
+            } catch (DBConnectionException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         if (selfVoiceState.inAudioChannel()) {
@@ -130,13 +137,8 @@ public class PlayCommand {
                 wrapper.createQueue(event.getGuild().getId(), platform.toString(), details[1], details[2], details[3]);
                 logger.info("Song successfully added to queue!");
 
-                boolean passed = playLatest(event.getGuild());
-                if (passed) {
-                    MessageWrapper.genericResponse(event, "Playing Song " + details[1], "by " + details[2]);
-                }
-                if (!passed) {
-                    MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the back of the queue;");
-                }
+                playLatest(event.getGuild());
+                MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the queue;");
 
                 return true;
             }
@@ -144,11 +146,8 @@ public class PlayCommand {
             wrapper.addSong(event.getGuild().getId(), platform.toString(), details[1], details[2], details[3]);// add song to back of queue in database
             logger.info("Song successfully added to queue!");
 
-            if (playLatest(event.getGuild())) {
-                MessageWrapper.genericResponse(event, "Playing Song " + details[1], "by " + details[2]);
-            } else {
-                MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the back of the queue;");
-            }
+            playLatest(event.getGuild());
+            MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the queue;");
 
             return true;
         } catch (DBConnectionException e) {
@@ -209,12 +208,22 @@ public class PlayCommand {
     }
 
     public static boolean playLatest(Guild guild) {
+        Logger logger = Logger.getLogger("orion");
         PlayerManager playerManager = PlayerManager.get();
 
         if (playerManager.getGuildMusicManager(guild).getTrackScheduler().getPlaying() == null) {
+            logger.info("Attempting to play latest song...");
             try {
-                Document popNextSong = new DatabaseWrapper().popNextSong(guild.getId());
-                String songUrl = popNextSong.getString("url");
+                Document song = new DatabaseWrapper().popNextSong(guild.getId());
+                String songUrl = song.getString("url");
+
+                String activeChannel = new DatabaseWrapper().getActiveChannel(guild.getId());
+                TextChannel textChannel = guild.getTextChannelById(activeChannel);
+
+                assert textChannel != null;
+                MessageWrapper.startedPlaying(textChannel, song);
+                new DatabaseWrapper().setNowPlaying(guild.getId(), song);
+                logger.info("Playing song: " + song.get("songTitle").toString() + " by " + song.get("artist").toString());
 
                 playerManager.play(guild, songUrl);
                 return true;
