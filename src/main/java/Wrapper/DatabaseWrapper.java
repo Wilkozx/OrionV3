@@ -63,7 +63,6 @@ public class DatabaseWrapper {
                 Document defaultSettings = new Document("volume", 100)
                                                 .append("loop", false)
                                                 .append("shuffle", false)
-                                                .append("autoplay", false)
                                                 .append("repeat", false)
                                                 .append("defaultPlatform", "SOUNDCLOUD")
                                                 .append("status", "DEFAULT");
@@ -292,7 +291,7 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
                 
-                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying", song)).getModifiedCount();
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying", song.append("paused", false))).getModifiedCount();
                 logger.info("Success! Set now playing for guild " + guildID + " to song " + song.get("songTitle") + ", rows modified: " + modCount);
             } catch(Exception e) {
                 e.printStackTrace();
@@ -315,6 +314,125 @@ public class DatabaseWrapper {
                 return nowPlaying;
             } catch(Exception e) {
                 throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
+            }
+        }
+    }
+
+    public void pauseSong(String guildID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to pause song for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying.paused", true)).getModifiedCount();
+                logger.info("Success! Paused song for guild " + guildID + ", rows modified: " + modCount);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void resumeSong(String guildID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to resume song for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying.paused", false)).getModifiedCount();
+                logger.info("Success! Resumed song for guild " + guildID + ", rows modified: " + modCount);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void setVolume(String guildID, int volume) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to set volume for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("settings.volume", volume)).getModifiedCount();
+                logger.info("Success! Set volume for guild " + guildID + " to " + volume + ", rows modified: " + modCount);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean loopToggle(String guildID) throws DBConnectionException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to set loop for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+
+                Boolean loop = (Boolean) collection.find(new Document("guildID", guildID)).first().get("settings.loop");
+
+                loop = !loop;
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("settings.loop", loop)).getModifiedCount();
+                logger.info("Success! Set loop for guild " + guildID + " to " + loop + ", rows modified: " + modCount);
+                return loop;
+            } catch(Exception e) {
+                throw new DBConnectionException(e.getMessage());
+            }
+        }
+    }
+
+    public boolean shuffleToggle(String guildID) throws DBConnectionException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to set shuffle for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+
+                Boolean shuffle = (Boolean) collection.find(new Document("guildID", guildID)).first().get("settings.shuffle");
+
+                shuffle = !shuffle;
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("settings.shuffle", shuffle)).getModifiedCount();
+                logger.info("Success! Set shuffle for guild " + guildID + " to " + shuffle + ", rows modified: " + modCount);
+                return shuffle;
+            } catch(Exception e) {
+                throw new DBConnectionException(e.getMessage());
+            }
+        }
+    }
+
+    public void setDefaultPlatform(String guildID, String platform) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to set default platform for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("settings.defaultPlatform", platform)).getModifiedCount();
+                logger.info("Success! Set default platform for guild " + guildID + " to " + platform + ", rows modified: " + modCount);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getDefaultPlatform(String guildID) throws DBConnectionException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to get default platform for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document result = collection.find(guildQuery).first();
+
+                String defaultPlatform = (String) result.get("settings.defaultPlatform");
+                logger.info("Success! Got default platform for guild: " + guildID);
+                return defaultPlatform;
+            } catch(Exception e) {
+                throw new DBConnectionException(e.getMessage());
             }
         }
     }
