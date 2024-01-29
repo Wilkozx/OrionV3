@@ -250,4 +250,40 @@ public class DatabaseWrapper {
             }
         }
     }
+
+    public void setActiveChannel(String guildID, String channelID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to set active channel to: " + channelID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", channelID);
+                Document updateQuery = new Document("$set", new Document("activeChannel", channelID));
+                collection.updateOne(guildQuery, updateQuery);
+                logger.info("Success! Set active channel to: " + channelID);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getActiveChannel(String guildID) throws DBEmptyQueueException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to get active channel for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document result = collection.find(guildQuery).first();
+
+                String activeChannel = (String) result.get("activeChannel");
+                logger.info("Success! Got active channel for guild: " + guildID);
+                return activeChannel;
+            } catch(Exception e) {
+                throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
+            }
+        }
+    }
 }
