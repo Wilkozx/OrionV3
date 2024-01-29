@@ -258,10 +258,9 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
                 
-                Document guildQuery = new Document("guildID", channelID);
                 Document updateQuery = new Document("$set", new Document("activeChannel", channelID));
-                collection.updateOne(guildQuery, updateQuery);
-                logger.info("Success! Set active channel to: " + channelID);
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("activeChannel", channelID)).getModifiedCount();
+                logger.info("Success! set active channel for guild " + channelID + " to " + channelID + ", rows modified: " + modCount);
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -283,6 +282,23 @@ public class DatabaseWrapper {
                 return activeChannel;
             } catch(Exception e) {
                 throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
+            }
+        }
+    }
+
+    public void setNowPlaying(String guildID, Document song) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to set now playing for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document updateQuery = new Document("$set", new Document("nowPlaying", song));
+                collection.updateOne(guildQuery, updateQuery);
+                logger.info("Success! Set now playing for guild: " + guildID);
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         }
     }
