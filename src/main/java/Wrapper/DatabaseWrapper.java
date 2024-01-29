@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import javax.print.Doc;
+
 public class DatabaseWrapper {
     private final String username = Dotenv.load().get("MongoUser");
     private final String password = Dotenv.load().get("MongoPass");
@@ -431,6 +433,25 @@ public class DatabaseWrapper {
                 String defaultPlatform = (String) result.get("settings.defaultPlatform");
                 logger.info("Success! Got default platform for guild: " + guildID);
                 return defaultPlatform;
+            } catch(Exception e) {
+                throw new DBConnectionException(e.getMessage());
+            }
+        }
+    }
+
+    public Document getSettings(String guildID) throws DBConnectionException {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to get settings for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document result = collection.find(guildQuery).first();
+
+                Document settings = (Document) result.get("settings");
+                logger.info("Success! Got settings for guild: " + guildID);
+                return settings;
             } catch(Exception e) {
                 throw new DBConnectionException(e.getMessage());
             }
