@@ -20,9 +20,9 @@ public class StopCommand {
         Logger logger = Logger.getLogger("orion");
         unsetNowPlaying(guild, logger);
         sendGoodbyeMessage(guild);
-        unsetActiveChannel(guild, logger);
         emptyQueue(guild, logger);
         destroyPlayer(guild);
+        unsetActiveChannel(guild, logger);
     }
 
     public static void unsetNowPlaying(Guild guild, Logger logger) {
