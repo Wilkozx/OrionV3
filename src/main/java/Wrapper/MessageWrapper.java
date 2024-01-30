@@ -3,6 +3,7 @@ package Wrapper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
@@ -71,9 +72,9 @@ public class MessageWrapper {
         Button shuffle;
 
         if (buttons[0]) {
-            playpause =  Button.secondary("resume", Emoji.fromFormatted("<:pause1:1201898934054690926>"));
+            playpause =  Button.secondary("resume", Emoji.fromFormatted("<:play1:1201898936705486868>"));
         } else {
-            playpause =  Button.secondary("pause", Emoji.fromFormatted("<:play1:1201898936705486868>"));
+            playpause =  Button.secondary("pause", Emoji.fromFormatted("<:pause1:1201898934054690926>"));
         }
 
         if (buttons[1]) {
@@ -93,5 +94,38 @@ public class MessageWrapper {
         Button list = Button.secondary("list", Emoji.fromFormatted("<:list1:1201904063143223306>"));
 
         textChannel.sendMessageEmbeds(embedBuilder.build()).setActionRow(shuffle, stop, playpause, skip, loop).addActionRow(list).queue();
+    }
+
+    public static void Disconnected(GuildVoiceUpdateEvent event) {
+        EmbedBuilder eb = new EmbedBuilder();
+
+        eb.setColor(new Color(255, 85, 0));
+        eb.setTitle("Goodbye.");
+        eb.setDescription("I have been destroyed and have left  🔊 **" + event.getOldValue().getName() + "**");
+
+        TextChannel channel = event.getGuild().getDefaultChannel().asTextChannel();
+        try {
+            DatabaseWrapper db = new DatabaseWrapper();
+            channel = event.getGuild().getTextChannelById(db.getActiveChannel(event.getGuild().getId()));
+        }  catch  (Exception ignore) {}
+
+        channel.sendMessageEmbeds(eb.build()).queue();
+    }
+
+    public static void Moved(GuildVoiceUpdateEvent event) {
+        
+        EmbedBuilder eb = new EmbedBuilder();
+
+        eb.setColor(new Color(255, 85, 0));
+        eb.setTitle("Active channel moved.");
+        eb.setDescription("I have been moved from  🔊 **" + event.getChannelLeft().getName() + "** to 🔊 **" + event.getChannelJoined().getName() + "**");
+
+        TextChannel channel = event.getGuild().getDefaultChannel().asTextChannel();
+        try {
+            DatabaseWrapper db = new DatabaseWrapper();
+            channel = event.getGuild().getTextChannelById(db.getActiveChannel(event.getGuild().getId()));
+        }  catch  (Exception ignore) {}
+
+        channel.sendMessageEmbeds(eb.build()).queue();
     }
 }

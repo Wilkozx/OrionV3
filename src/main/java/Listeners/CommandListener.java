@@ -37,6 +37,9 @@ public class CommandListener extends ListenerAdapter {
             CommandFunctions.SkipCommand.skipCommand(event);
         }
 
+        if (event.getName().equalsIgnoreCase("stop")) {
+            CommandFunctions.StopCommand.stopCommand(event);
+        }
 
     }
 }

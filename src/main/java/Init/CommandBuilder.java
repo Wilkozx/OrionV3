@@ -43,7 +43,8 @@ public class CommandBuilder {
             guild.upsertCommand("skip", "skips the current track").queue();
             logger.info("Added command /skip");
 
-
+            guild.upsertCommand("stop", "stops the bot and clears the queue").queue();
+            logger.info("Added command /stop.");
         }
     }
 }
