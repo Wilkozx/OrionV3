@@ -228,8 +228,9 @@ public class PlayCommand {
                 playerManager.play(guild, songUrl);
                 logger.info("Song successfully playing!");
                 return true;
-            } catch (DBEmptyQueueException | DBConnectionException ignore) {
-                
+            } catch (DBEmptyQueueException | DBConnectionException e) {
+                logger.info("Error playing song, queue is empty in  guild " + guild.getId());
+                StopCommand.initShutdown(guild);
             }
         } else {
             logger.info("Error playing song");

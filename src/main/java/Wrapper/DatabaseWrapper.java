@@ -160,6 +160,21 @@ public class DatabaseWrapper {
         }
     }
 
+    public void destroyQueue(String guildID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to destroy Queue for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+
+                collection.updateOne(Filters.eq("guildID", guildID), Updates.set("queue", Arrays.asList(new Document())));
+                logger.info("Success! Destroyed Queue for guild: " + guildID);
+            } catch (MongoException e) {
+                logger.warning("Error destroying Queue: " + e.getMessage());
+            }
+        }
+    }
+
     public void addSong(String guildID, String platform, String songTitle, String artist, String url) throws DBConnectionException {
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
@@ -258,7 +273,7 @@ public class DatabaseWrapper {
                 MongoCollection<Document> collection = database.getCollection("queue");
                 
                 long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("activeChannel", channelID)).getModifiedCount();
-                logger.info("Success! set active channel for guild " + channelID + " to " + channelID + ", rows modified: " + modCount);
+                logger.info("Success! set active channel for guild " + guildID + " to " + channelID + ", rows modified: " + modCount);
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -277,9 +292,27 @@ public class DatabaseWrapper {
 
                 String activeChannel = (String) result.get("activeChannel");
                 logger.info("Success! Got active channel for guild: " + guildID);
+                if (activeChannel.isEmpty()) {
+                    throw new DBEmptyQueueException("Active channel is empty or does not exist.");
+                }
                 return activeChannel;
             } catch(Exception e) {
-                throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
+                throw new DBEmptyQueueException("Active channel is empty or does not exist: \n " + e.getMessage());
+            }
+        }
+    }
+
+    public void unsetActiveChannel(String guildID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to unset active channel for: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("activeChannel", "")).getModifiedCount();
+                logger.info("Success! unset active channel for guild " + guildID + ", rows modified: " + modCount);
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -314,6 +347,21 @@ public class DatabaseWrapper {
                 return nowPlaying;
             } catch(Exception e) {
                 throw new DBEmptyQueueException("Queue is empty or does not exist: \n " + e.getMessage());
+            }
+        }
+    }
+
+    public void unsetNowPlaying(String guildID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to unset now playing for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying", new Document())).getModifiedCount();
+                logger.info("Success! Unset now playing for guild " + guildID + ", rows modified: " + modCount);
+            } catch(Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -471,7 +519,7 @@ public class DatabaseWrapper {
         }
     }
 
-    public String getActiveMessage(String guildID) {
+    public String getActiveMessage(String guildID) throws DBEmptyQueueException {
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
                 logger.info("Attempting to get active message for guild: " + guildID);
@@ -483,10 +531,27 @@ public class DatabaseWrapper {
 
                 String activeMessage = (String) result.get("nowPlaying.activeMessage");
                 logger.info("Success! Got active message for guild: " + guildID);
+                if (activeMessage.isEmpty()) {
+                    throw new DBEmptyQueueException("Active message is empty or does not exist.");
+                }
                 return activeMessage;
             } catch(Exception e) {
+                throw new DBEmptyQueueException("Active message is empty or does not exist.");
+            }
+        }
+    }
+
+    public void unsetActiveMessage(String guildID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to unset active message for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying.activeMessage", "")).getModifiedCount();
+                logger.info("Success! unset active message for " + guildID + ", rows modified: " + modCount);
+            } catch(Exception e) {
                 e.printStackTrace();
-                return null;
             }
         }
     }
