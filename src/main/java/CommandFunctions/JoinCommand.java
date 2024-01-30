@@ -43,9 +43,7 @@ public class JoinCommand {
                 throw new RuntimeException(e);
             }
 
-            PlayCommand.playLatest(event.getGuild());
             return true;
-
         } catch (Exception e) {
             logger.warning(e.getMessage());
             logger.warning(Arrays.toString(e.getStackTrace()));
