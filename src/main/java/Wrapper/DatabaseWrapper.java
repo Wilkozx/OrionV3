@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import javax.print.Doc;
-
 public class DatabaseWrapper {
     private final String username = Dotenv.load().get("MongoUser");
     private final String password = Dotenv.load().get("MongoPass");
@@ -39,16 +37,16 @@ public class DatabaseWrapper {
             .serverApi(serverApi)
             .build();
         
-        try (MongoClient mongoClient = MongoClients.create(settings)) {
-            try {
-                MongoDatabase database = mongoClient.getDatabase("admin");
-                database.runCommand(new Document("ping", 1));
-                logger.info("Ping Successful - You are connected to MongoDB!");
-            } catch (MongoException e) {
-                logger.warning("Error connecting to MongoDB: " + e.getMessage());;
-                throw new DBConnectionException("Error connecting to MongoDB: \n" + e.getMessage() + "\nPlease check your MongoDB connection string.");
-            }
-        }
+        // try (MongoClient mongoClient = MongoClients.create(settings)) {
+        //     try {
+        //         MongoDatabase database = mongoClient.getDatabase("admin");
+        //         database.runCommand(new Document("ping", 1));
+        //         logger.info("Ping Successful - You are connected to MongoDB!");
+        //     } catch (MongoException e) {
+        //         logger.warning("Error connecting to MongoDB: " + e.getMessage());;
+        //         throw new DBConnectionException("Error connecting to MongoDB: \n" + e.getMessage() + "\nPlease check your MongoDB connection string.");
+        //     }
+        // }
     }
 
     public void initGuild(String guildID) throws DBConnectionException {
@@ -454,6 +452,41 @@ public class DatabaseWrapper {
                 return settings;
             } catch(Exception e) {
                 throw new DBConnectionException(e.getMessage());
+            }
+        }
+    }
+
+    public void setActiveMessage(String guildID, String messageID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to set active message to: " + messageID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                long modCount = collection.updateOne(Filters.eq("guildID", guildID), Updates.set("nowPlaying.activeMessage", messageID)).getModifiedCount();
+                logger.info("Success! set active message to " + messageID + ", rows modified: " + modCount);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getActiveMessage(String guildID) {
+        try (MongoClient mongoClient = MongoClients.create(settings)) {
+            try {
+                logger.info("Attempting to get active message for guild: " + guildID);
+                MongoDatabase database = mongoClient.getDatabase("guilds");
+                MongoCollection<Document> collection = database.getCollection("queue");
+                
+                Document guildQuery = new Document("guildID", guildID);
+                Document result = collection.find(guildQuery).first();
+
+                String activeMessage = (String) result.get("nowPlaying.activeMessage");
+                logger.info("Success! Got active message for guild: " + guildID);
+                return activeMessage;
+            } catch(Exception e) {
+                e.printStackTrace();
+                return null;
             }
         }
     }

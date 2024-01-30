@@ -226,10 +226,13 @@ public class PlayCommand {
                 logger.info("Playing song: " + song.get("songTitle").toString() + " by " + song.get("artist").toString());
 
                 playerManager.play(guild, songUrl);
+                logger.info("Song successfully playing!");
                 return true;
             } catch (DBEmptyQueueException | DBConnectionException ignore) {
+                
             }
         } else {
+            logger.info("Error playing song");
             return false;
         }
 
