@@ -230,7 +230,7 @@ public class PlayCommand {
                 return true;
             } catch (DBEmptyQueueException | DBConnectionException e) {
                 logger.info("Error playing song, queue is empty in  guild " + guild.getId());
-                StopCommand.initShutdown(guild);
+                //StopCommand.initShutdown(guild);
             }
         } else {
             logger.info("Error playing song");
