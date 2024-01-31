@@ -95,7 +95,7 @@ public class MessageWrapper {
 
         textChannel.sendMessageEmbeds(embedBuilder.build()).setActionRow(shuffle, stop, playpause, skip, loop).addActionRow(list).queue(
             (message) -> {
-                String messageID = message.getIdLong() + "";
+                String messageID = message.getId();
                 try {
                     new DatabaseWrapper().setActiveMessage(textChannel.getGuild().getId(), messageID);
                 } catch (Exception e) {
