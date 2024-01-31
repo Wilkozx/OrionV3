@@ -93,7 +93,17 @@ public class MessageWrapper {
         Button skip = Button.secondary("skip", Emoji.fromFormatted("<:skip1:1201904072001585174>"));
         Button list = Button.secondary("list", Emoji.fromFormatted("<:list1:1201904063143223306>"));
 
-        textChannel.sendMessageEmbeds(embedBuilder.build()).setActionRow(shuffle, stop, playpause, skip, loop).addActionRow(list).queue();
+        textChannel.sendMessageEmbeds(embedBuilder.build()).setActionRow(shuffle, stop, playpause, skip, loop).addActionRow(list).queue(
+            (message) -> {
+                String messageID = message.getIdLong() + "";
+                try {
+                    new DatabaseWrapper().setActiveMessage(textChannel.getGuild().getId(), messageID);
+                } catch (Exception e) {
+                    logger.warning(e.getStackTrace().toString());
+                }
+                logger.info("Active message: " + messageID);
+            }
+        );
     }
 
     public static void Disconnected(GuildVoiceUpdateEvent event) {
