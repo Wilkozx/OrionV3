@@ -5,11 +5,62 @@ import Wrapper.MessageWrapper;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 import java.util.Objects;
 
 public class ResumeCommand {
-    public static boolean resumeCommand(SlashCommandInteractionEvent event) {
+        public static boolean resumeCommand(SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
+
+        short commandCheckResult = VoiceCommandChecks.checkVoiceState(event.getMember().getVoiceState(), event.getGuild().getSelfMember().getVoiceState());
+
+        switch (commandCheckResult) {
+            case 0:
+                PlayerManager.get().getGuildMusicManager(Objects.requireNonNull(event.getGuild())).getTrackScheduler().resume();
+                MessageWrapper.genericResponse(event, "Resumed", "The song has been paused");
+                return true;
+            case 1:
+                MessageWrapper.errorResponse(event, "You need to be in a voice channel to resume a song!");
+                return false;
+            case 2:
+                MessageWrapper.errorResponse(event, "I need to be in a voice channel to resume a song!");
+                return false;
+            case 3:
+                MessageWrapper.errorResponse(event, "Orion is currently in another channel");
+                return false;
+            default:
+                MessageWrapper.errorResponse(event, "Unknown error, try again.");
+                return false;
+        }
+    }
+
+    public static boolean resumeCommand(ButtonInteractionEvent event) {
+        event.deferReply().queue();
+
+        short commandCheckResult = VoiceCommandChecks.checkVoiceState(event.getMember().getVoiceState(), event.getGuild().getSelfMember().getVoiceState());
+
+        switch (commandCheckResult) {
+            case 0:
+                PlayerManager.get().getGuildMusicManager(Objects.requireNonNull(event.getGuild())).getTrackScheduler().resume();
+                MessageWrapper.genericResponse(event, "Resumed", "The song has been resumed");
+                return true;
+            case 1:
+                MessageWrapper.errorResponse(event, "You need to be in a voice channel to resume a song!");
+                return false;
+            case 2:
+                MessageWrapper.errorResponse(event, "I need to be in a voice channel to resume a song!");
+                return false;
+            case 3:
+                MessageWrapper.errorResponse(event, "Orion is currently in another channel");
+                return false;
+            default:
+                MessageWrapper.errorResponse(event, "Unknown error, try again.");
+                return false;
+        }
+    }
+    
+    public static boolean resumeCommandDepricated(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         Member member = event.getMember();
         assert member != null;

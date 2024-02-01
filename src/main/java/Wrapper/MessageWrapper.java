@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import org.bson.Document;
@@ -22,7 +23,16 @@ public class MessageWrapper {
         event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
-    public static void genericResponse(SlashCommandInteractionEvent event, String title, String body) { //USE THIS IF YOU DONT NEED A SPECIAL COLOR
+    public static void genericResponse(SlashCommandInteractionEvent event, String title, String body) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(title);
+        embedBuilder.setDescription(body);
+        embedBuilder.setColor(new Color(255,69,0));
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    public static void genericResponse(ButtonInteractionEvent event, String title, String body) { //USE THIS IF YOU DONT NEED A SPECIAL COLOR
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(title);
         embedBuilder.setDescription(body);
@@ -37,7 +47,16 @@ public class MessageWrapper {
         embedBuilder.setAuthor("Error", null, "https://www.lifepng.com/wp-content/uploads/2020/12/Letter-X-Roundlet-png-hd.png");
         embedBuilder.setColor(Color.red);
 
-        event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+    }
+
+    public static void errorResponse(ButtonInteractionEvent event, String error) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setDescription(error);
+        embedBuilder.setAuthor("Error", null, "https://www.lifepng.com/wp-content/uploads/2020/12/Letter-X-Roundlet-png-hd.png");
+        embedBuilder.setColor(Color.red);
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
     }
 
     public static void startedPlaying(TextChannel textChannel, Document song) {
@@ -110,8 +129,8 @@ public class MessageWrapper {
         EmbedBuilder eb = new EmbedBuilder();
 
         eb.setColor(new Color(255, 85, 0));
-        eb.setTitle("Goodbye.");
-        eb.setDescription("I have been destroyed and have left  🔊 **" + event.getOldValue().getName() + "**");
+        eb.setTitle("Shutting Down...");
+        eb.setDescription("I have left  🔊 **" + event.getOldValue().getName() + "**");
 
         TextChannel channel = event.getGuild().getDefaultChannel().asTextChannel();
         try {

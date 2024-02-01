@@ -1,15 +1,98 @@
 package CommandFunctions;
 
 import MusicPlayer.PlayerManager;
+import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import okhttp3.internal.ws.RealWebSocket.Message;
 
 import java.util.Objects;
 
+import org.bson.Document;
+
+import Errors.DBConnectionException;
+import Errors.DBEmptyQueueException;
+
 public class SkipCommand {
+
     public static boolean skipCommand(SlashCommandInteractionEvent event) {
+        event.deferReply().queue();
+
+        short commandCheckResult = VoiceCommandChecks.checkVoiceState(event.getMember().getVoiceState(), event.getGuild().getSelfMember().getVoiceState());
+
+        switch(commandCheckResult) {
+            case 0:
+                String skipMessage = "Song by Artist";
+                try{
+                    Document song = new DatabaseWrapper().getNowPlaying(event.getGuild().getId());
+                    skipMessage = song.get("songTitle").toString() + " by " + song.get("artist").toString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                skipSong(event.getGuild());
+                MessageWrapper.genericResponse(event, "Skipped Song", skipMessage);
+                return true;
+            case 1:
+                MessageWrapper.errorResponse(event, "You need to be in a voice channel to skip a song!");
+                return false;
+            case 2:
+                MessageWrapper.errorResponse(event, "I need to be in a voice channel to skip a song!");
+                return true;
+            case 3:
+                MessageWrapper.errorResponse(event, "Orion is currently in another channel");
+                return false;
+            default:
+                MessageWrapper.errorResponse(event, "Unknown error, try again.");
+                return false;
+        }
+    }
+
+    public static boolean skipCommand(ButtonInteractionEvent event) {
+        event.deferReply().queue();
+
+        short commandCheckResult = VoiceCommandChecks.checkVoiceState(event.getMember().getVoiceState(), event.getGuild().getSelfMember().getVoiceState());
+
+        switch(commandCheckResult) {
+            case 0:
+                String skipMessage = "Song by Artist";
+                try{
+                    Document song = new DatabaseWrapper().getNowPlaying(event.getGuild().getId());
+                    skipMessage = song.get("songTitle").toString() + " by " + song.get("artist").toString();
+                } catch (DBConnectionException | DBEmptyQueueException e) {
+                    MessageWrapper.errorResponse(event, "There is not currently a song playing");
+                }
+                skipSong(event.getGuild());
+                MessageWrapper.genericResponse(event, "Skipped Song", skipMessage);
+                return true;
+            case 1:
+                MessageWrapper.errorResponse(event, "You need to be in a voice channel to skip a song!");
+                return false;
+            case 2:
+                MessageWrapper.errorResponse(event, "I need to be in a voice channel to skip a song!");
+                return true;
+            case 3:
+                MessageWrapper.errorResponse(event, "Orion is currently in another channel");
+                return false;
+            default:
+                MessageWrapper.errorResponse(event, "Unknown error, try again.");
+                return false;
+        }
+    }
+
+    private static void skipSong(Guild guild) {
+        try {
+            new DatabaseWrapper().unsetNowPlaying(guild.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        PlayerManager.get().getGuildMusicManager(guild).getTrackScheduler().stop();
+    }
+
+    public static boolean skipCommandDepricated(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         Member member = event.getMember();
         assert member != null;
