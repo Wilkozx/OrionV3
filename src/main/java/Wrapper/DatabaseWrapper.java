@@ -476,7 +476,8 @@ public class DatabaseWrapper {
                 Document guildQuery = new Document("guildID", guildID);
                 Document result = collection.find(guildQuery).first();
 
-                String defaultPlatform = (String) result.get("settings.defaultPlatform");
+                Document settings = (Document) result.get("settings");
+                String defaultPlatform = (String) settings.get("defaultPlatform");
                 logger.info("Success! Got default platform for guild: " + guildID);
                 return defaultPlatform;
             } catch(Exception e) {
@@ -529,8 +530,11 @@ public class DatabaseWrapper {
                 Document guildQuery = new Document("guildID", guildID);
                 Document result = collection.find(guildQuery).first();
 
-                String activeMessage = (String) result.get("nowPlaying.activeMessage");
-                logger.info("Success! Got active message for guild: " + guildID);
+                logger.severe(result.toString());
+
+                Document nowPlaying = (Document) result.get("nowPlaying");
+                String activeMessage = (String) nowPlaying.get("activeMessage");
+                logger.info("Success! Got active message "  + activeMessage + " for guild: " + guildID);
                 if (activeMessage.isEmpty()) {
                     throw new DBEmptyQueueException("Active message is empty or does not exist.");
                 }

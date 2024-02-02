@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.swing.Action;
+
 import CommandFunctions.PauseCommand;
 import CommandFunctions.ResumeCommand;
 import CommandFunctions.SkipCommand;
@@ -11,6 +13,7 @@ import CommandFunctions.StopCommand;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 public class ButtonListener extends ListenerAdapter{
@@ -31,18 +34,31 @@ public class ButtonListener extends ListenerAdapter{
                 break;
             case "pause":
                 if (PauseCommand.pauseCommand(event)) {
-                    List<Button> actionBar = new ArrayList<>(event.getMessage().getActionRows().get(0).getButtons());
+                    List<ActionRow> actionRows = event.getMessage().getActionRows();
+                    List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
+
                     Button resumeButton = Button.secondary("resume", Emoji.fromFormatted("<:play1:1201898936705486868>"));
                     actionBar.set(2, resumeButton);
-                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setActionRow(actionBar).queue();
+
+                    List<ActionRow> newActionRows = new ArrayList<ActionRow>();
+                    newActionRows.add(ActionRow.of(actionBar));
+                    newActionRows.add(actionRows.get(1));
+                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setComponents(newActionRows).queue();
                 }
                 break;
             case "resume":
                 if (ResumeCommand.resumeCommand(event)) {
-                    List<Button> actionBar = new ArrayList<>(event.getMessage().getActionRows().get(0).getButtons());
+                    List<ActionRow> actionRows = event.getMessage().getActionRows();
+                    List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
+
                     Button pauseButton = Button.secondary("pause", Emoji.fromFormatted("<:pause1:1201898934054690926>"));
                     actionBar.set(2, pauseButton);
-                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setActionRow(actionBar).queue();
+
+                    List<ActionRow> newActionRows = new ArrayList<ActionRow>();
+                    newActionRows.add(ActionRow.of(actionBar));
+                    newActionRows.add(actionRows.get(1));
+
+                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setComponents(newActionRows).queue();
                 }
                 break;
             case "shuffleon":

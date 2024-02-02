@@ -1,6 +1,10 @@
 package MusicPlayer;
 
 import CommandFunctions.PlayCommand;
+import Wrapper.DatabaseWrapper;
+
+import java.util.logging.Logger;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -13,10 +17,34 @@ public class GuildMusicManager {
     private final AudioForwarder audioForwarder;
 
     public GuildMusicManager(AudioPlayerManager manager, Guild guild) {
+        Logger logger = Logger.getLogger("orion");
+        logger.info("Creating new GuildMusicManager for guild: " + guild.getName());
         AudioPlayer player = manager.createPlayer();
         trackScheduler = new TrackScheduler(player) {
             @Override
             public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+                logger.info("Track ended, playing next track...");
+                try {
+                    DatabaseWrapper db = new DatabaseWrapper();
+                    try {
+                        logger.info("Attempting to delete active message...");
+                        // guild.getTextChannelById(db.getActiveChannel(guild.getId())).getHistory().getMessageById(db.getActiveMessage(guild.getId())).delete().queue();
+                        guild.getTextChannelById(db.getActiveChannel(guild.getId())).deleteMessageById(db.getActiveMessage(guild.getId())).queue();
+                        logger.info("Active message deleted successfully!");
+                    } catch (Exception e) {
+                        logger.info("No active message found: \n" + e.getMessage());
+                    }
+                    try {
+                        logger.info("Attempting to unset now playing...");
+                        db.unsetNowPlaying(guild.getId());
+                        logger.info("Now playing unset successfully!");
+                    } catch (Exception e) {
+                        logger.info("Error unsetting now playing: \n" + e.getMessage());
+                    }
+                } catch (Exception e) {
+                    logger.info("No active message found: \n" + e.getMessage());
+                }
+
                 PlayCommand.playLatest(guild);
             }
         };

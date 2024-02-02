@@ -138,7 +138,7 @@ public class PlayCommand {
                 logger.info("Song successfully added to queue!");
 
                 playLatest(event.getGuild());
-                MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the queue;");
+                MessageWrapper.genericResponse(event, "Added Song " + details[1], " by " + details[2] + " to the queue;");
 
                 return true;
             }
@@ -214,7 +214,8 @@ public class PlayCommand {
         if (playerManager.getGuildMusicManager(guild).getTrackScheduler().getPlaying() == null) {
             logger.info("Attempting to play latest song...");
             try {
-                Document song = new DatabaseWrapper().popNextSong(guild.getId());
+                DatabaseWrapper db = new DatabaseWrapper();
+                Document song = db.popNextSong(guild.getId());
                 String songUrl = song.getString("url");
 
                 String activeChannel = new DatabaseWrapper().getActiveChannel(guild.getId());
@@ -229,7 +230,7 @@ public class PlayCommand {
                 logger.info("Song successfully playing!");
                 return true;
             } catch (DBEmptyQueueException | DBConnectionException e) {
-                logger.info("Error playing song, queue is empty in  guild " + guild.getId());
+                logger.info("Error playing song, queue is empty in guild " + guild.getId());
                 //StopCommand.initShutdown(guild);
             }
         } else {

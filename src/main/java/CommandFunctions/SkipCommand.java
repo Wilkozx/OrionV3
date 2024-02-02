@@ -84,11 +84,6 @@ public class SkipCommand {
     }
 
     private static void skipSong(Guild guild) {
-        try {
-            new DatabaseWrapper().unsetNowPlaying(guild.getId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         PlayerManager.get().getGuildMusicManager(guild).getTrackScheduler().stop();
     }
 
