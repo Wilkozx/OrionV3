@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import javax.swing.Action;
 
 import CommandFunctions.PauseCommand;
+import CommandFunctions.QueueCommand;
 import CommandFunctions.ResumeCommand;
 import CommandFunctions.SkipCommand;
 import CommandFunctions.StopCommand;
@@ -30,7 +31,7 @@ public class ButtonListener extends ListenerAdapter{
                 StopCommand.stopCommand(event);
                 break;
             case "list":
-                //QueueCommand.queueCommand(event);
+                QueueCommand.queueCommand(event);
                 break;
             case "pause":
                 if (PauseCommand.pauseCommand(event)) {
