@@ -1,17 +1,28 @@
 package CommandFunctions;
 
 import MusicPlayer.PlayerManager;
+import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class ResumeCommand {
         public static boolean resumeCommand(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
+        Guild guild = event.getGuild();
+        Logger logger = Logger.getLogger("orion");
 
         short commandCheckResult = VoiceCommandChecks.checkVoiceState(event.getMember().getVoiceState(), event.getGuild().getSelfMember().getVoiceState());
 
@@ -19,6 +30,24 @@ public class ResumeCommand {
             case 0:
                 PlayerManager.get().getGuildMusicManager(Objects.requireNonNull(event.getGuild())).getTrackScheduler().resume();
                 MessageWrapper.genericResponse(event, "Resumed", "The song has been paused");
+                try {
+                    DatabaseWrapper db = new DatabaseWrapper();
+                    Message message = guild.getTextChannelById(db.getActiveChannel(guild.getId())).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();
+
+                    List<ActionRow> actionRows = message.getActionRows();
+                    List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
+
+                    Button button = Button.secondary("pause", Emoji.fromFormatted("<:pause1:1201898934054690926>"));
+                    actionBar.set(2, button);
+
+                    List<ActionRow> newActionRows = new ArrayList<ActionRow>();
+                    newActionRows.add(ActionRow.of(actionBar));
+                    newActionRows.add(actionRows.get(1));
+
+                    guild.getTextChannelById(db.getActiveChannel(guild.getId())).editMessageEmbedsById(db.getActiveMessage(guild.getId()), message.getEmbeds().get(0)).setComponents(newActionRows).queue();
+                } catch (Exception e) {
+                    logger.warning("Failed to update resume button for guild " + event.getGuild().getId());;
+                }
                 return true;
             case 1:
                 MessageWrapper.errorResponse(event, "You need to be in a voice channel to resume a song!");

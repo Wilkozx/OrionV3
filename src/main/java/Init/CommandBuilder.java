@@ -51,6 +51,10 @@ public class CommandBuilder {
 
             guild.upsertCommand("loop", "adds songs back into the queue once they are played").queue();
             logger.info("Added command /loop.");
+
+            guild.upsertCommand("remove", "removes a song from the queue")
+                    .addOption(OptionType.INTEGER, "index", "the index of the song you want to remove", true).queue();
+            logger.info("Added command /remove.");
         }
     }
 }

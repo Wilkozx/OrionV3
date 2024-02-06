@@ -49,5 +49,9 @@ public class CommandListener extends ListenerAdapter {
             CommandFunctions.LoopCommand.loopCommand(event);
         }
 
+        if (event.getName().equalsIgnoreCase("remove")) {
+            CommandFunctions.RemoveCommand.removeCommand(event);
+        }
+
     }
 }
