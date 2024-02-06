@@ -76,12 +76,10 @@ public class MessageWrapper {
         try {
             String guildID =  textChannel.getGuild().getId();
             DatabaseWrapper db = new DatabaseWrapper();
-            Document nowPlaying = db.getNowPlaying(guildID);
             Document settings = db.getSettings(guildID);
 
-            buttons[0] = nowPlaying.get("paused").toString().equals("true");
-            buttons[1] = settings.get("loop").toString().equals("true");
-            buttons[2] = settings.get("shuffle").toString().equals("true");
+            buttons[1] = settings.getBoolean("loop");
+            buttons[2] = settings.getBoolean("shuffle");
         } catch (Exception e) {
             logger.info(e.toString());
         }

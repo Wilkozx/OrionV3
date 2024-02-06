@@ -243,7 +243,7 @@ public class DatabaseWrapper {
     public Document removeSong(String guildID, int index) throws DBEmptyQueueException {
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
-                logger.info("Attempting to pop next song from queue for guild: " + guildID);
+                logger.info("Attempting to remove song index: " + index + " from queue for guild: " + guildID);
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
                 
@@ -418,7 +418,8 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
 
-                Boolean loop = (Boolean) collection.find(new Document("guildID", guildID)).first().get("settings.loop");
+                Document settings = (Document) collection.find(new Document("guildID", guildID)).first().get("settings");
+                Boolean loop = (Boolean) settings.get("loop");
 
                 loop = !loop;
                 
@@ -438,7 +439,8 @@ public class DatabaseWrapper {
                 MongoDatabase database = mongoClient.getDatabase("guilds");
                 MongoCollection<Document> collection = database.getCollection("queue");
 
-                Boolean shuffle = (Boolean) collection.find(new Document("guildID", guildID)).first().get("settings.shuffle");
+                Document settings = (Document) collection.find(new Document("guildID", guildID)).first().get("settings");
+                Boolean shuffle = (Boolean) settings.get("shuffle");
 
                 shuffle = !shuffle;
                 

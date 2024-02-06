@@ -41,5 +41,13 @@ public class CommandListener extends ListenerAdapter {
             CommandFunctions.StopCommand.stopCommand(event);
         }
 
+        if (event.getName().equalsIgnoreCase("shuffle")) {
+            CommandFunctions.ShuffleCommand.shuffleCommand(event);
+        }
+
+        if (event.getName().equalsIgnoreCase("loop")) {
+            CommandFunctions.LoopCommand.loopCommand(event);
+        }
+
     }
 }

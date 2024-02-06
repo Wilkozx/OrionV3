@@ -45,6 +45,12 @@ public class CommandBuilder {
 
             guild.upsertCommand("stop", "stops the bot and clears the queue").queue();
             logger.info("Added command /stop.");
+
+            guild.upsertCommand("shuffle", "makes the music play in a random order").queue();
+            logger.info("Added command /shuffle.");
+
+            guild.upsertCommand("loop", "adds songs back into the queue once they are played").queue();
+            logger.info("Added command /loop.");
         }
     }
 }

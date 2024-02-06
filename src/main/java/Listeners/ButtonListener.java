@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.Action;
-
+import CommandFunctions.LoopCommand;
 import CommandFunctions.PauseCommand;
 import CommandFunctions.QueueCommand;
 import CommandFunctions.ResumeCommand;
+import CommandFunctions.ShuffleCommand;
 import CommandFunctions.SkipCommand;
 import CommandFunctions.StopCommand;
+import Wrapper.MessageWrapper;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -63,17 +64,67 @@ public class ButtonListener extends ListenerAdapter{
                 }
                 break;
             case "shuffleon":
-                //ShuffleCommand.shuffleOnCommand(event);
+                if (ShuffleCommand.shuffleCommand(event)) {
+                    List<ActionRow> actionRows = event.getMessage().getActionRows();
+                    List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
+
+                    Button button = Button.secondary("shuffleoff", Emoji.fromFormatted("<:shuffle1:1201904069736665158>"));
+                    actionBar.set(0, button);
+
+                    List<ActionRow> newActionRows = new ArrayList<ActionRow>();
+                    newActionRows.add(ActionRow.of(actionBar));
+                    newActionRows.add(actionRows.get(1));
+
+                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setComponents(newActionRows).queue();
+                }
                 break;
             case "shuffleoff":
-                //ShuffleCommand.shuffleOffCommand(event);
+                if (ShuffleCommand.shuffleCommand(event)) {
+                    List<ActionRow> actionRows = event.getMessage().getActionRows();
+                    List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
+
+                    Button button = Button.secondary("shuffleon", Emoji.fromFormatted("<:shuffle2:1201904071087489034>"));
+                    actionBar.set(0, button);
+
+                    List<ActionRow> newActionRows = new ArrayList<ActionRow>();
+                    newActionRows.add(ActionRow.of(actionBar));
+                    newActionRows.add(actionRows.get(1));
+
+                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setComponents(newActionRows).queue();
+                }
                 break;
             case "loopon":
-                //LoopCommand.loopOnCommand(event);
+                if (LoopCommand.loopCommand(event)) {
+                    List<ActionRow> actionRows = event.getMessage().getActionRows();
+                    List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
+
+                    Button button = Button.secondary("loopoff", Emoji.fromFormatted("<:loop1:1201904065878179860>"));
+                    actionBar.set(4, button);
+
+                    List<ActionRow> newActionRows = new ArrayList<ActionRow>();
+                    newActionRows.add(ActionRow.of(actionBar));
+                    newActionRows.add(actionRows.get(1));
+
+                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setComponents(newActionRows).queue();
+                }
                 break;
             case "loopoff":
-                //LoopCommand.loopOffCommand(event);
+                if (LoopCommand.loopCommand(event)) {
+                    List<ActionRow> actionRows = event.getMessage().getActionRows();
+                    List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
+
+                    Button button = Button.secondary("loopon", Emoji.fromFormatted("<:loop2:1201904067404894300>"));
+                    actionBar.set(4, button);
+
+                    List<ActionRow> newActionRows = new ArrayList<ActionRow>();
+                    newActionRows.add(ActionRow.of(actionBar));
+                    newActionRows.add(actionRows.get(1));
+
+                    event.getMessage().editMessage(event.getMessage().getContentRaw()).setComponents(newActionRows).queue();
+                }
                 break;
+            default:
+                MessageWrapper.errorResponse(event, "Invalid button, unknown error. Please try again.");
         }
 
     }

@@ -5,6 +5,8 @@ import Wrapper.DatabaseWrapper;
 
 import java.util.logging.Logger;
 
+import org.bson.Document;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -34,6 +36,12 @@ public class GuildMusicManager {
                     } catch (Exception e) {
                         logger.info("No active message found: \n" + e.getMessage());
                     }
+
+                    Document song = db.getNowPlaying(guild.getId());
+                    
+                    if (db.getSettings(guild.getId()).getBoolean("loop")) {
+                        db.addSong(guild.getId(), song.getString("platform"), song.getString("songTitle"), song.getString("artist"), song.getString("url"));
+                    }
                     try {
                         logger.info("Attempting to unset now playing...");
                         db.unsetNowPlaying(guild.getId());
@@ -45,6 +53,9 @@ public class GuildMusicManager {
                     logger.info("No active message found: \n" + e.getMessage());
                 }
 
+                if (guild.getSelfMember().getVoiceState().getChannel() == null) {
+                    return;
+                }
                 PlayCommand.playLatest(guild);
             }
         };

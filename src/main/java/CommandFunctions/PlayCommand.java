@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.bson.Document;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -215,7 +216,21 @@ public class PlayCommand {
             logger.info("Attempting to play latest song...");
             try {
                 DatabaseWrapper db = new DatabaseWrapper();
-                Document song = db.popNextSong(guild.getId());
+                Document song;
+                Document settings = db.getSettings(guild.getId());
+                if (settings.getBoolean("shuffle")) {
+                    ArrayList<Document> queue = db.getQueue(guild.getId());
+                    int randomIndex = (int) (Math.random() * queue.size()) + 1;
+                    try {
+                        song = db.removeSong(guild.getId(), randomIndex);
+                    } catch (IndexOutOfBoundsException e) {
+                        song = db.popNextSong(guild.getId());
+                    }
+                    
+                } else {
+                    song = db.popNextSong(guild.getId());
+                }
+
                 String songUrl = song.getString("url");
 
                 String activeChannel = new DatabaseWrapper().getActiveChannel(guild.getId());
