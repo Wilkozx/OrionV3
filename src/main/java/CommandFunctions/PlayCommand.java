@@ -11,7 +11,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+
 import org.bson.Document;
 
 import java.net.URI;
@@ -23,6 +26,172 @@ import java.util.logging.Logger;
 public class PlayCommand {
 
     public static boolean playCommand(SlashCommandInteractionEvent event) {
+
+        event.deferReply().queue();
+
+        Logger logger = Logger.getLogger("orion");
+        Guild guild = event.getGuild();
+        Member member = event.getMember();
+        Member self = guild.getSelfMember();
+        String song = Objects.requireNonNull(event.getOption("song")).getAsString();
+        String requestedPlatform = null;
+        
+        try {
+            requestedPlatform = Objects.requireNonNull(event.getOption("platform")).getAsString().toLowerCase().replaceAll("\\s+", "");
+        } catch (Exception e) {
+            logger.info("User did not specify a platform");
+        }
+
+        short voiceStatus = VoiceCommandChecks.checkVoiceState(member.getVoiceState(), self.getVoiceState());
+
+        switch (voiceStatus) {
+            case 0:
+                break;
+            case 1:
+                MessageWrapper.errorResponse(event, "You need to be in a voice channel to queue a song");
+                return false;
+            case 2:
+                syncBotToUserChannel(event, member.getVoiceState());
+                break;
+            case 3:
+                MessageWrapper.errorResponse(event, "You need to be in the same channel to queue a song");
+                return false;
+        }
+
+        Platform platform = urlType(song);
+        String[] details = new String[4];
+
+        switch (platform) {
+            case ERROR:
+                MessageWrapper.errorResponse(event, "Invalid platform, Valid Options: Soundcloud, Youtube");
+                break;
+            case NULL:
+                details = parseDefault(song, guild, requestedPlatform); // this is the only case where you do not have a url
+                break;
+            case SOUNDCLOUD:
+                details = parseSoundcloud(song);
+                break;
+            case YOUTUBE:
+                details = parseYoutube(song);
+                break;
+            case SPOTIFY:
+                MessageWrapper.errorResponse(event, "Spotify is not supported at this time");
+                return false;
+           }
+
+        Boolean added = addSongToDB(details, guild, platform);
+        if (added) {
+            MessageWrapper.genericResponse(event, "Added Song " + details[1], " by " + details[2] + " to the queue;");
+            return true;
+        }
+        MessageWrapper.errorResponse(event, "There was an error while adding the song to the queue, please try again later");
+        return false;
+
+    }
+
+    public static boolean playCommand(ModalInteractionEvent event) {
+
+        event.deferReply().queue();
+
+        Logger logger = Logger.getLogger("orion");
+        Guild guild = event.getGuild();
+        Member member = event.getMember();
+        Member self = guild.getSelfMember();
+        String song = Objects.requireNonNull(event.getValue("song")).getAsString();
+        String requestedPlatform = null;
+
+        short voiceStatus = VoiceCommandChecks.checkVoiceState(member.getVoiceState(), self.getVoiceState());
+
+        switch (voiceStatus) {
+            case 0:
+                break;
+            case 1:
+                MessageWrapper.errorResponse(event, "You need to be in a voice channel to queue a song");
+                return false;
+            case 2:
+                syncBotToUserChannel(event, member.getVoiceState());
+                break;
+            case 3:
+                MessageWrapper.errorResponse(event, "You need to be in the same channel to queue a song");
+                return false;
+        }
+
+        Platform platform = urlType(song);
+        String[] details = new String[4];
+
+        switch (platform) {
+            case ERROR:
+                MessageWrapper.errorResponse(event, "Invalid platform, Valid Options: Soundcloud, Youtube");
+                break;
+            case NULL:
+                details = parseDefault(song, guild, requestedPlatform); // this is the only case where you do not have a url
+                break;
+            case SOUNDCLOUD:
+                details = parseSoundcloud(song);
+                break;
+            case YOUTUBE:
+                details = parseYoutube(song);
+                break;
+            case SPOTIFY:
+                MessageWrapper.errorResponse(event, "Spotify is not supported at this time");
+                return false;
+           }
+
+        Boolean added = addSongToDB(details, guild, platform);
+        if (added) {
+            MessageWrapper.genericResponse(event, "Added Song " + details[1], " by " + details[2] + " to the queue;");
+            return true;
+        }
+        MessageWrapper.errorResponse(event, "There was an error while adding the song to the queue, please try again later");
+        return false;
+
+    }
+
+    public static String[] parseDefault(String song, Guild guild, String requestedPlatform) {
+        if (requestedPlatform == null) {
+            return getDefaultAndParse(song, guild);
+        }
+        switch (requestedPlatform) {
+            case "SOUNDCLOUD":
+                return parseSoundcloud(song);
+            case "YOUTUBE":
+                return parseYoutube(song);
+            default:
+                return getDefaultAndParse(song, guild);
+        }
+    }
+
+    public static String[] getDefaultAndParse(String song, Guild guild) {
+
+        try {
+            DatabaseWrapper db = new DatabaseWrapper();
+            Document settings = db.getSettings(guild.getId());
+            String platform = settings.getString("defaultPlatform");
+
+            switch (platform) {
+                case "SOUNDCLOUD":
+                    return parseSoundcloud(song);
+                case "YOUTUBE":
+                    return parseYoutube(song);
+                default:
+                    throw new Exception("Invalid platform");
+            }
+        } catch (Exception e) {
+            return parseSoundcloud(song);
+        }
+    }
+
+    private static String[] parseSoundcloud(String song) {
+        return SoundCloud.searchSoundCloud(song);
+    }
+
+    private static String[] parseYoutube(String song) {
+        return SoundCloud.searchSoundCloud(song);
+        //TODO: implement youtube search
+    }
+
+    @Deprecated
+    public static boolean playCommandDeprecated(SlashCommandInteractionEvent event) {
         Logger logger = Logger.getLogger("orion");
 
         Member member = event.getMember();
@@ -158,8 +327,57 @@ public class PlayCommand {
         }
     }
 
+    public static void playCommand(ButtonInteractionEvent event) {
+        MessageWrapper.playModal(event);
+    }
+
+    public static boolean addSongToDB (String[] details, Guild guild, Platform platform) {
+        Logger logger = Logger.getLogger("orion");
+        String guildID = guild.getId();
+        try {
+            DatabaseWrapper wrapper = new DatabaseWrapper();
+            try {
+                wrapper.getQueue(guildID);
+            } catch (DBEmptyQueueException e) {
+                logger.info("Queue not found, creating new queue...");
+                wrapper.createQueue(guildID, platform.toString(), details[1], details[2], details[3]);
+                logger.info("Song successfully added to queue!");
+
+                playLatest(guild);
+                //MessageWrapper.genericResponse(event, "Added Song " + details[1], " by " + details[2] + " to the queue;");
+                return true;
+            }
+
+            wrapper.addSong(guildID, platform.toString(), details[1], details[2], details[3]);// add song to back of queue in database
+            logger.info("Song successfully added to queue!");
+
+            playLatest(guild);
+            //MessageWrapper.genericResponse(event, "Added Song " + details[1], "by " + details[2] + " to the queue;");
+
+            return true;
+        } catch (DBConnectionException e) {
+            logger.warning("Error adding song to queue: " + e.getMessage());
+            //MessageWrapper.errorResponse(event, "There was an error while adding the song to the queue, please try again later");
+            return false;
+        }
+    }
+
     // eventually move this with the additional checks elsewhere but for now this is fine
     public static void syncBotToUserChannel(SlashCommandInteractionEvent event, GuildVoiceState memberVoiceState) {
+        Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
+        GuildVoiceState selfVoiceState = self.getVoiceState();
+
+        assert selfVoiceState != null;
+        if (!selfVoiceState.inAudioChannel()) {
+            event.getGuild().getAudioManager().openAudioConnection(memberVoiceState.getChannel());
+        } else {
+            if (selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
+                // add this
+            }
+        }
+    }
+
+    public static void syncBotToUserChannel(ModalInteractionEvent event, GuildVoiceState memberVoiceState) {
         Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
         GuildVoiceState selfVoiceState = self.getVoiceState();
 
@@ -181,12 +399,13 @@ public class PlayCommand {
         ERROR
     }
 
+    @Deprecated
     private static short isValidURL(String potentialURL) {
         Logger logger = Logger.getLogger("orion");
         try {
             URI url = URI.create(potentialURL);
             String domain = url.getHost();
-            if (domain.endsWith("youtube.com") || domain.endsWith("spotify.com") || domain.endsWith("soundcloud.com") || domain.endsWith("youtu.be")) {
+            if (domain.endsWith("youtube.com") || /*domain.endsWith("spotify.com") ||*/ domain.endsWith("soundcloud.com") || domain.endsWith("youtu.be")) {
                 logger.info("Valid URL: " + url);
                 return 1;
             } else {
@@ -196,6 +415,30 @@ public class PlayCommand {
         } catch (Exception e) {
             logger.info("Invalid URL: " + e.getMessage());
             return 0;
+        }
+    }
+
+    private static Platform urlType(String potentialURL) {
+        Logger logger = Logger.getLogger("orion");
+        try {
+            URI url = URI.create(potentialURL);
+            String domain = url.getHost();
+            if (domain.endsWith("youtube.com") || domain.endsWith("youtu.be")) {
+                logger.info("Youtube URL: " + url);
+                return Platform.YOUTUBE;
+            } else if (domain.endsWith("spotify.com")) {
+                logger.info("Spotify URL: " + url);
+                return Platform.SPOTIFY;
+            } else if (domain.endsWith("soundcloud.com")) {
+                logger.info("Soundcloud URL: " + url);
+                return Platform.SOUNDCLOUD;
+            } else {
+                logger.info("Valid URL, but unsupported");
+                return Platform.ERROR;
+            }
+        } catch (Exception e) {
+            logger.info("Invalid URL: " + e.getMessage());
+            return Platform.NULL;
         }
     }
 

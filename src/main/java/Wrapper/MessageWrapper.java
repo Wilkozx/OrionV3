@@ -4,9 +4,14 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 
 import org.bson.Document;
 
@@ -23,7 +28,7 @@ public class MessageWrapper {
         event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
-    public static void genericResponse(SlashCommandInteractionEvent event, String title, String body) {
+    public static void genericResponse(SlashCommandInteractionEvent event, String title, String body) { //USE THIS IF YOU DONT NEED A SPECIAL COLOR
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(title);
         embedBuilder.setDescription(body);
@@ -32,7 +37,16 @@ public class MessageWrapper {
         event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
-    public static void genericResponse(ButtonInteractionEvent event, String title, String body) { //USE THIS IF YOU DONT NEED A SPECIAL COLOR
+    public static void genericResponse(ButtonInteractionEvent event, String title, String body) { 
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(title);
+        embedBuilder.setDescription(body);
+        embedBuilder.setColor(new Color(255,69,0));
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
+    public static void genericResponse(ModalInteractionEvent event, String title, String body) { 
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(title);
         embedBuilder.setDescription(body);
@@ -51,6 +65,15 @@ public class MessageWrapper {
     }
 
     public static void errorResponse(ButtonInteractionEvent event, String error) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setDescription(error);
+        embedBuilder.setAuthor("Error", null, "https://www.lifepng.com/wp-content/uploads/2020/12/Letter-X-Roundlet-png-hd.png");
+        embedBuilder.setColor(Color.red);
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+    }
+
+    public static void errorResponse(ModalInteractionEvent event, String error) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setDescription(error);
         embedBuilder.setAuthor("Error", null, "https://www.lifepng.com/wp-content/uploads/2020/12/Letter-X-Roundlet-png-hd.png");
@@ -109,8 +132,12 @@ public class MessageWrapper {
         Button stop = Button.secondary("stop", Emoji.fromFormatted("<:stop1:1201904074690400286>"));
         Button skip = Button.secondary("skip", Emoji.fromFormatted("<:skip1:1201904072001585174>"));
         Button list = Button.secondary("list", Emoji.fromFormatted("<:list1:1201904063143223306>"));
+        Button play = Button.secondary("play", Emoji.fromFormatted("<:playsong:1204826666828959816>"));
+        Button playlistAdd = Button.secondary("playlistAdd", Emoji.fromFormatted("<:slyskull:1012105662081290421>"));
+        Button playlistLoad = Button.secondary("playlistLoad", Emoji.fromFormatted("<:slyskull:1012105662081290421>"));
+        Button website = Button.secondary("website", Emoji.fromFormatted("<:website:1204827491634511882>"));
 
-        textChannel.sendMessageEmbeds(embedBuilder.build()).setActionRow(shuffle, stop, playpause, skip, loop).addActionRow(list).queue(
+        textChannel.sendMessageEmbeds(embedBuilder.build()).setActionRow(shuffle, stop, playpause, skip, loop).addActionRow(list, play, website).queue(
             (message) -> {
                 String messageID = message.getId();
                 try {
@@ -154,5 +181,20 @@ public class MessageWrapper {
         }  catch  (Exception ignore) {}
 
         channel.sendMessageEmbeds(eb.build()).queue();
+    }
+
+    public static void playModal(ButtonInteractionEvent event) {
+        Modal.Builder mb = Modal.create("playsong", "Play Song");
+
+        TextInput song = TextInput.create("song", "Enter a song to add to the queue", TextInputStyle.SHORT)
+            .setPlaceholder("Song title or URL")
+            .setMinLength(1)
+            .setMaxLength(150)
+            .setRequired(true)
+            .build();
+
+        mb.addComponents(ActionRow.of(song));
+
+        event.replyModal(mb.build()).queue();
     }
 }

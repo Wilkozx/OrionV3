@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import CommandFunctions.LoopCommand;
 import CommandFunctions.PauseCommand;
+import CommandFunctions.PlayCommand;
 import CommandFunctions.QueueCommand;
 import CommandFunctions.ResumeCommand;
 import CommandFunctions.ShuffleCommand;
@@ -122,6 +123,12 @@ public class ButtonListener extends ListenerAdapter{
 
                     event.getMessage().editMessage(event.getMessage().getContentRaw()).setComponents(newActionRows).queue();
                 }
+                break;
+            case "play":
+                PlayCommand.playCommand(event);
+                break;
+            case "website":
+                
                 break;
             default:
                 MessageWrapper.errorResponse(event, "Invalid button, unknown error. Please try again.");

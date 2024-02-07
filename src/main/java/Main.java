@@ -2,6 +2,7 @@ import Init.CommandBuilder;
 import Listeners.ButtonListener;
 import Listeners.CommandListener;
 import Listeners.DisconnectListener;
+import Listeners.ModalListener;
 import MusicSearch.Spotify;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
@@ -38,7 +39,7 @@ public class Main {
         }
 
         JDA Orion = JDABuilder.createDefault(token)
-                .addEventListeners(new CommandListener(), new DisconnectListener(), new ButtonListener())
+                .addEventListeners(new CommandListener(), new DisconnectListener(), new ButtonListener(), new ModalListener())
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .build().awaitReady();
 
