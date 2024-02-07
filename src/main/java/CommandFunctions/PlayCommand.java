@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.Interaction;
 
 import org.bson.Document;
 
@@ -235,21 +236,7 @@ public class PlayCommand {
     }
 
     // eventually move this with the additional checks elsewhere but for now this is fine
-    public static void syncBotToUserChannel(SlashCommandInteractionEvent event, GuildVoiceState memberVoiceState) {
-        Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
-        GuildVoiceState selfVoiceState = self.getVoiceState();
-
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inAudioChannel()) {
-            event.getGuild().getAudioManager().openAudioConnection(memberVoiceState.getChannel());
-        } else {
-            if (selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
-                // add this
-            }
-        }
-    }
-
-    public static void syncBotToUserChannel(ModalInteractionEvent event, GuildVoiceState memberVoiceState) {
+    public static void syncBotToUserChannel(Interaction event, GuildVoiceState memberVoiceState) {
         Member self = Objects.requireNonNull(event.getGuild()).getSelfMember();
         GuildVoiceState selfVoiceState = self.getVoiceState();
 
