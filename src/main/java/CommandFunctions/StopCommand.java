@@ -29,6 +29,7 @@ public class StopCommand {
         destroyPlayer(guild);
         emptyQueue(guild, logger);
         unsetNowPlaying(guild, logger);
+        unsetActiveChannel(guild, logger);
     }
 
     public static void unsetNowPlaying(Guild guild, Logger logger) {
