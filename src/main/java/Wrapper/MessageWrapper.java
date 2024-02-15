@@ -160,7 +160,7 @@ public class MessageWrapper {
         TextChannel channel = event.getGuild().getDefaultChannel().asTextChannel();
         try {
             DatabaseWrapper db = new DatabaseWrapper();
-            channel = event.getGuild().getTextChannelById(db.getActiveChannel(event.getGuild().getId()));
+            channel = event.getGuild().getTextChannelById(db.getActiveChannel(event.getGuild()));
         }  catch  (Exception ignore) {}
 
         channel.sendMessageEmbeds(eb.build()).queue();
@@ -177,7 +177,7 @@ public class MessageWrapper {
         TextChannel channel = event.getGuild().getDefaultChannel().asTextChannel();
         try {
             DatabaseWrapper db = new DatabaseWrapper();
-            channel = event.getGuild().getTextChannelById(db.getActiveChannel(event.getGuild().getId()));
+            channel = event.getGuild().getTextChannelById(db.getActiveChannel(event.getGuild()));
         }  catch  (Exception ignore) {}
 
         channel.sendMessageEmbeds(eb.build()).queue();

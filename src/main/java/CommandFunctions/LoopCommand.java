@@ -46,7 +46,7 @@ public class LoopCommand {
             if (loop) {
                 MessageWrapper.genericResponse(event, "Loop Enabled", "The queue will now add played songs to the back of the queue.");
                 try {
-                    Message message = guild.getTextChannelById(db.getActiveChannel(guild.getId())).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();
+                    Message message = guild.getTextChannelById(db.getActiveChannel(guild)).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();
 
                     List<ActionRow> actionRows = message.getActionRows();
                     List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
@@ -58,7 +58,7 @@ public class LoopCommand {
                     newActionRows.add(ActionRow.of(actionBar));
                     newActionRows.add(actionRows.get(1));
 
-                    guild.getTextChannelById(db.getActiveChannel(guild.getId())).editMessageEmbedsById(db.getActiveMessage(guild.getId()), message.getEmbeds().get(0)).setComponents(newActionRows).queue();
+                    guild.getTextChannelById(db.getActiveChannel(guild)).editMessageEmbedsById(db.getActiveMessage(guild.getId()), message.getEmbeds().get(0)).setComponents(newActionRows).queue();
                     logger.info("Loop button updated for guild " + event.getGuild().getId());
                 } catch (Exception e) {
                     logger.warning("Failed to update loop button for guild " + event.getGuild().getId());;
@@ -66,7 +66,7 @@ public class LoopCommand {
             } else {
                 MessageWrapper.genericResponse(event, "Loop Disabled", "The queue will no longer add played songs back into the queue.");
                 try {
-                    Message message = guild.getTextChannelById(db.getActiveChannel(guild.getId())).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();
+                    Message message = guild.getTextChannelById(db.getActiveChannel(guild)).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();
 
                     List<ActionRow> actionRows = message.getActionRows();
                     List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
@@ -78,7 +78,7 @@ public class LoopCommand {
                     newActionRows.add(ActionRow.of(actionBar));
                     newActionRows.add(actionRows.get(1));
 
-                    guild.getTextChannelById(db.getActiveChannel(guild.getId())).editMessageEmbedsById(db.getActiveMessage(guild.getId()), message.getEmbeds().get(0)).setComponents(newActionRows).queue();
+                    guild.getTextChannelById(db.getActiveChannel(guild)).editMessageEmbedsById(db.getActiveMessage(guild.getId()), message.getEmbeds().get(0)).setComponents(newActionRows).queue();
                     logger.info("Loop button updated for guild " + event.getGuild().getId());
                 } catch (Exception e) {
                     logger.warning("Failed to update loop button for guild " + event.getGuild().getId());

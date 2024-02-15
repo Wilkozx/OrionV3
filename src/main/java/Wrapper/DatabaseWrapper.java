@@ -10,10 +10,12 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import io.github.cdimascio.dotenv.Dotenv;
+import net.dv8tion.jda.api.entities.Guild;
 import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public class DatabaseWrapper {
@@ -280,7 +282,8 @@ public class DatabaseWrapper {
         }
     }
 
-    public String getActiveChannel(String guildID) throws DBEmptyQueueException {
+    public String getActiveChannel(Guild guild) throws DBEmptyQueueException {
+        String guildID = guild.getId();
         try (MongoClient mongoClient = MongoClients.create(settings)) {
             try {
                 logger.info("Attempting to get active channel for guild: " + guildID);
@@ -297,7 +300,7 @@ public class DatabaseWrapper {
                 }
                 return activeChannel;
             } catch(Exception e) {
-                throw new DBEmptyQueueException("Active channel is empty or does not exist: \n " + e.getMessage());
+                return Objects.requireNonNull(guild.getDefaultChannel()).asTextChannel().getId();
             }
         }
     }

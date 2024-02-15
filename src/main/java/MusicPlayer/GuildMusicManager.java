@@ -31,7 +31,7 @@ public class GuildMusicManager {
                     try {
                         logger.info("Attempting to delete active message...");
                         // guild.getTextChannelById(db.getActiveChannel(guild.getId())).getHistory().getMessageById(db.getActiveMessage(guild.getId())).delete().queue();
-                        guild.getTextChannelById(db.getActiveChannel(guild.getId())).deleteMessageById(db.getActiveMessage(guild.getId())).queue();
+                        guild.getTextChannelById(db.getActiveChannel(guild)).deleteMessageById(db.getActiveMessage(guild.getId())).queue();
                         logger.info("Active message deleted successfully!");
                     } catch (Exception e) {
                         logger.info("No active message found: \n" + e.getMessage());

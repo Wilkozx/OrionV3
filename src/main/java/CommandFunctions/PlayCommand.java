@@ -311,7 +311,7 @@ public class PlayCommand {
 
                 String songUrl = song.getString("url");
 
-                String activeChannel = new DatabaseWrapper().getActiveChannel(guild.getId());
+                String activeChannel = new DatabaseWrapper().getActiveChannel(guild);
                 TextChannel textChannel = guild.getTextChannelById(activeChannel);
 
                 MessageWrapper.startedPlaying(textChannel, song);

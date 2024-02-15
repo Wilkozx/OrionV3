@@ -33,7 +33,7 @@ public class PauseCommand {
                 MessageWrapper.genericResponse(event, "Paused", "The song has been paused");
                 try {
                     DatabaseWrapper db = new DatabaseWrapper();
-                    Message message = guild.getTextChannelById(db.getActiveChannel(guild.getId())).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();
+                    Message message = guild.getTextChannelById(db.getActiveChannel(guild)).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();
                     
                     List<ActionRow> actionRows = message.getActionRows();
                     List<Button> actionBar = new ArrayList<>(actionRows.get(0).getButtons());
@@ -45,7 +45,7 @@ public class PauseCommand {
                     newActionRows.add(ActionRow.of(actionBar));
                     newActionRows.add(actionRows.get(1));
 
-                    guild.getTextChannelById(db.getActiveChannel(guild.getId())).editMessageEmbedsById(db.getActiveMessage(guild.getId()), message.getEmbeds().get(0)).setComponents(newActionRows).queue();
+                    guild.getTextChannelById(db.getActiveChannel(guild)).editMessageEmbedsById(db.getActiveMessage(guild.getId()), message.getEmbeds().get(0)).setComponents(newActionRows).queue();
                 } catch (Exception e) {
                     logger.warning("Failed to update pause button for guild " + event.getGuild().getId());
                     e.printStackTrace();
