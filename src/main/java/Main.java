@@ -21,7 +21,10 @@ import java.util.logging.SimpleFormatter;
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         // Get Token - Set Token
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv
+                .configure()
+                .directory("env")
+                .load();
         String token = dotenv.get("TOKEN");
 
         // Create Logger - Create Date.Time Formatting
