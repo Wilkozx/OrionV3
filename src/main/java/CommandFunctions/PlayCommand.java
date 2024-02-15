@@ -46,6 +46,10 @@ public class PlayCommand {
                 return false;
             case 2:
                 syncBotToUserChannel(event, member.getVoiceState());
+                try {
+                    new DatabaseWrapper().setActiveChannel(event.getChannel().getId(), guild.getId());
+                } catch (Exception ignore) {
+                }
                 break;
             case 3:
                 MessageWrapper.errorResponse(event, "You need to be in the same channel to queue a song");
@@ -310,7 +314,6 @@ public class PlayCommand {
                 String activeChannel = new DatabaseWrapper().getActiveChannel(guild.getId());
                 TextChannel textChannel = guild.getTextChannelById(activeChannel);
 
-                assert textChannel != null;
                 MessageWrapper.startedPlaying(textChannel, song);
                 new DatabaseWrapper().setNowPlaying(guild.getId(), song);
                 logger.info("Playing song: " + song.get("songTitle").toString() + " by " + song.get("artist").toString());
