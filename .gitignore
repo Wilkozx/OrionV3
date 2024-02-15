@@ -40,4 +40,5 @@ build/
 
 ### Orion ###
 .env
+env
 logs/*
