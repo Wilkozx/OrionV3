@@ -23,7 +23,7 @@ public class Main {
         // Get Token - Set Token
         Dotenv dotenv = Dotenv
                 .configure()
-                .directory("env")
+                .filename("env")
                 .load();
         String token = dotenv.get("TOKEN");
 
