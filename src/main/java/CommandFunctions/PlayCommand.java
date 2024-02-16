@@ -47,7 +47,7 @@ public class PlayCommand {
             case 2:
                 syncBotToUserChannel(event, member.getVoiceState());
                 try {
-                    new DatabaseWrapper().setActiveChannel(event.getChannel().getId(), guild.getId());
+                    new DatabaseWrapper().setActiveChannel(guild.getId(), event.getChannel().getId());
                 } catch (Exception ignore) {
                 }
                 break;

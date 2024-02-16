@@ -58,18 +58,15 @@ public class Main {
         };
         timer.scheduleAtFixedRate(task, 0, 3600000);
 
+        // Check if anyone is listening every 5 minutes
         Timer timer2 = new Timer();
-
         TimerTask task2 = new TimerTask() {
             @Override
             public void run() {
                 VoiceCommandChecks.isAnyoneListening(Orion);
             }
         };
-
         timer2.scheduleAtFixedRate(task2, 0, 300000);
 
-
     }
-
 }
