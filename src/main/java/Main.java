@@ -1,3 +1,4 @@
+import CommandFunctions.VoiceCommandChecks;
 import Init.CommandBuilder;
 import Listeners.ButtonListener;
 import Listeners.CommandListener;
@@ -56,6 +57,19 @@ public class Main {
             }
         };
         timer.scheduleAtFixedRate(task, 0, 3600000);
+
+        Timer timer2 = new Timer();
+
+        TimerTask task2 = new TimerTask() {
+            @Override
+            public void run() {
+                VoiceCommandChecks.isAnyoneListening(Orion);
+            }
+        };
+
+        timer2.scheduleAtFixedRate(task2, 0, 300000);
+
+
     }
 
 }
