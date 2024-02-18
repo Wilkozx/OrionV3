@@ -21,7 +21,8 @@ import java.util.logging.Logger;
 public class DatabaseWrapper {
     private final String username = Dotenv.load().get("MongoUser");
     private final String password = Dotenv.load().get("MongoPass");
-    private final String dbConnectionString = "mongodb+srv://" + username + ":" + password + "@orionmongo.wnlq83d.mongodb.net/?retryWrites=true&w=majority";
+    private final String hostLocation = Dotenv.load().get("MongoHost");
+    private final String dbConnectionString = "mongodb+srv://" + username + ":" + password + "@" + hostLocation + "/?retryWrites=true&w=majority";
     private ServerApi serverApi;
     private MongoClientSettings settings;
     private Logger logger = Logger.getLogger("orion");
