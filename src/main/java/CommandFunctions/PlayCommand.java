@@ -3,7 +3,8 @@ package CommandFunctions;
 import Errors.DBConnectionException;
 import Errors.DBEmptyQueueException;
 import MusicPlayer.PlayerManager;
-import MusicSearch.SoundCloud;
+import MusicSearch.SoundCloudWrapper;
+import MusicSearch.YoutubeWrapper;
 import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
 import net.dv8tion.jda.api.entities.Guild;
@@ -188,20 +189,20 @@ public class PlayCommand {
     }
 
     private static String[] parseSoundcloud(String song) throws MalformedURLException {
-        return SoundCloud.parseSoundcloud(song);
+        return SoundCloudWrapper.parseSoundcloud(song);
     }
 
-    private static String[] parseYoutube(String song) {
-        return SoundCloud.searchSoundCloud(song);
+    private static String[] parseYoutube(String song) throws MalformedURLException {
+        return YoutubeWrapper.parseYoutube(song);
         //TODO: implement youtube search
     }
 
     private static String[] searchSoundcloud(String song) {
-        return SoundCloud.searchSoundCloud(song);
+        return SoundCloudWrapper.searchSoundCloud(song);
     }
 
     private static String[] searchYoutube(String song) {
-        return SoundCloud.searchSoundCloud(song);
+        return SoundCloudWrapper.searchSoundCloud(song);
     }
 
     public static void playCommand(ButtonInteractionEvent event) {
