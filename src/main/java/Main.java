@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,15 +30,28 @@ public class Main {
         final Logger logger = Logger.getLogger("orion");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd-HH.mm.ss");
 
+        FileHandler fileHandler = null;
+
         try {
-            // Create Log File - Windows/Linux Compatible + Add SimpleFormatting
-            FileHandler fileHandler = new FileHandler("logs" + System.getProperty("file.separator") + dtf.format(LocalDateTime.now()) + ".log");
+            fileHandler = new FileHandler("logs/latest.log", false);
             SimpleFormatter formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
             logger.addHandler(fileHandler);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        FileHandler finalFileHandler = fileHandler;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            finalFileHandler.close();
+            logger.removeHandler(finalFileHandler);
+            File oldFile = new File("logs/latest.log");
+            File newFile = new File("logs/" + dtf.format(LocalDateTime.now()) + ".log");
+            newFile.getParentFile().mkdirs();
+            if (oldFile.exists()) {
+                oldFile.renameTo(newFile);
+            }
+        }));
 
         JDA Orion = JDABuilder.createDefault(token)
                 .addEventListeners(new CommandListener(), new DisconnectListener(), new ButtonListener(), new ModalListener())
