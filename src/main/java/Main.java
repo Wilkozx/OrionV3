@@ -4,7 +4,7 @@ import Listeners.ButtonListener;
 import Listeners.CommandListener;
 import Listeners.DisconnectListener;
 import Listeners.ModalListener;
-import MusicSearch.Spotify;
+import MusicSearch.SpotifyWrapper;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -53,7 +53,7 @@ public class Main {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                Spotify.updateAccessToken();
+                SpotifyWrapper.updateAccessToken();
             }
         };
         timer.scheduleAtFixedRate(task, 0, 3600000);

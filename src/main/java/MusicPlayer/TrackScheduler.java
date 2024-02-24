@@ -1,5 +1,6 @@
 package MusicPlayer;
 
+import Wrapper.DatabaseWrapper;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;

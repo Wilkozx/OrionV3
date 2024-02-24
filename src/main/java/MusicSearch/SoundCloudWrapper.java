@@ -8,7 +8,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-public class SoundCloud {
+public class SoundCloudWrapper {
 
     static Logger logger = Logger.getLogger("orion");
     static Dotenv dotenv = Dotenv.load();
@@ -113,7 +112,7 @@ public class SoundCloud {
         return (JsonArray) dataObject.get("collection");
     }
 
-    private static JsonObject getJsonObject(URL localurl) throws IOException {
+    static JsonObject getJsonObject(URL localurl) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         Scanner scanner = new Scanner(localurl.openStream());
 

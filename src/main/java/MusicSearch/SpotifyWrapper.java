@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class Spotify {
+public class SpotifyWrapper {
     static Dotenv dotenv = Dotenv.load();
     static Logger logger = Logger.getLogger("orion");
     static String SpotifyID = dotenv.get("SPOTIFYID");
@@ -34,7 +34,7 @@ public class Spotify {
             .clientCredentials()
             .build();
 
-    public Spotify() {
+    public SpotifyWrapper() {
     }
 
     public static String[] interpretSpotifyLink(String url) {
