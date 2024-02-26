@@ -13,13 +13,13 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 public class StopCommand {
     public static Boolean stopCommand(SlashCommandInteractionEvent event) {
         event.reply("Goodbye!").setEphemeral(true).queue();
-        initShutdown(event.getGuild());
+        event.getGuild().getAudioManager().closeAudioConnection();
         return true;
     }
 
     public static Boolean stopCommand(ButtonInteractionEvent event) {
         event.reply("Goodbye!").setEphemeral(true).queue();
-        initShutdown(event.getGuild());
+        event.getGuild().getAudioManager().closeAudioConnection();
         return true;
     }
 

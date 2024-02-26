@@ -295,7 +295,7 @@ public class DatabaseWrapper {
                 Document result = collection.find(guildQuery).first();
 
                 String activeChannel = (String) result.get("activeChannel");
-                logger.info("Success! Got active channel for guild: " + guildID);
+                logger.info("Success! Got active channel for guild: " + guildID + ", channelID: " + activeChannel);
                 if (activeChannel.isEmpty()) {
                     throw new DBEmptyQueueException("Active channel is empty or does not exist.");
                 }
