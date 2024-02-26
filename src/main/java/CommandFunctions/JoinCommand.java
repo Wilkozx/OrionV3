@@ -28,6 +28,8 @@ public class JoinCommand {
             return false;
         }
 
+        // add permisions cheeck here
+
         // Try to join the voice channel
         try {
             VoiceChannel userChannel = Objects.requireNonNull(member.getVoiceState().getChannel()).asVoiceChannel();

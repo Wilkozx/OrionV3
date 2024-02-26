@@ -57,6 +57,12 @@ public class PlayCommand {
                 return false;
         }
 
+        try {
+            requestedPlatform = Objects.requireNonNull(event.getOption("platform")).getAsString().toUpperCase();
+        } catch (NullPointerException e) {
+            logger.info("No platform specified, using default");
+        }
+
         Platform platform = urlType(song);
         String[] details = new String[4];
         try {
@@ -160,9 +166,9 @@ public class PlayCommand {
         }
         switch (requestedPlatform) {
             case "SOUNDCLOUD":
-                return parseSoundcloud(song);
+                return searchSoundcloud(song);
             case "YOUTUBE":
-                return parseYoutube(song);
+                return searchYoutube(song);
             default:
                 return getDefaultAndParse(song, guild);
         }
@@ -202,7 +208,7 @@ public class PlayCommand {
     }
 
     private static String[] searchYoutube(String song) {
-        return SoundCloudWrapper.searchSoundCloud(song);
+        return YoutubeWrapper.searchYoutube(song);
     }
 
     public static void playCommand(ButtonInteractionEvent event) {
