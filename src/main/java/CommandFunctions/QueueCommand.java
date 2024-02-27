@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 public class QueueCommand {
     public static boolean queueCommand(SlashCommandInteractionEvent event) {
         Logger logger = Logger.getLogger("orion");
+        // TODO: LIMIT THIS FUCKING COMMAND TO 4096 CHARACTERS
 
         event.deferReply().queue();
         try {

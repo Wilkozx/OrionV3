@@ -7,6 +7,8 @@ import MusicSearch.SoundCloudWrapper;
 import MusicSearch.YoutubeWrapper;
 import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -18,8 +20,10 @@ import net.dv8tion.jda.api.interactions.Interaction;
 
 import org.bson.Document;
 
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -79,6 +83,10 @@ public class PlayCommand {
                 case YOUTUBE:
                     details = parseYoutube(song);
                     break;
+                case YOUTUBE_PLAYLIST:
+                    YoutubeWrapper.parseYoutubePlaylist(song, event);
+                    playLatest(guild);
+                    return true;
                 case SPOTIFY:
                     MessageWrapper.errorResponse(event, "Spotify is not supported at this time");
                     return false;
@@ -95,7 +103,6 @@ public class PlayCommand {
         }
         MessageWrapper.errorResponse(event, "There was an error while adding the song to the queue, please try again later");
         return false;
-
     }
 
     public static boolean playCommand(ModalInteractionEvent event) {
@@ -141,6 +148,10 @@ public class PlayCommand {
                 case YOUTUBE:
                     details = parseYoutube(song);
                     break;
+                case YOUTUBE_PLAYLIST:
+                    YoutubeWrapper.parseYoutubePlaylist(song, event);
+                    playLatest(guild);
+                    return true;
                 case SPOTIFY:
                     MessageWrapper.errorResponse(event, "Spotify is not supported at this time");
                     return false;
@@ -265,6 +276,7 @@ public class PlayCommand {
         SPOTIFY,
         SOUNDCLOUD,
         YOUTUBE,
+        YOUTUBE_PLAYLIST,
         NULL,
         ERROR
     }
@@ -275,8 +287,16 @@ public class PlayCommand {
             URI url = URI.create(potentialURL);
             String domain = url.getHost();
             if (domain.endsWith("youtube.com") || domain.endsWith("youtu.be")) {
-                logger.info("Youtube URL: " + url);
-                return Platform.YOUTUBE;
+                switch (url.getPath()) {
+                    case "/playlist":
+                        logger.info("Youtube Playlist URL: " + url);
+                        return Platform.YOUTUBE_PLAYLIST;
+                    case "/watch":
+                        logger.info("Youtube URL: " + url);
+                        return Platform.YOUTUBE;
+                    default:
+                        return Platform.ERROR;
+                }
             } else if (domain.endsWith("spotify.com")) {
                 logger.info("Spotify URL: " + url);
                 return Platform.SPOTIFY;
