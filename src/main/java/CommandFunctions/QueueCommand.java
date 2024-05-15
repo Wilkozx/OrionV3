@@ -25,7 +25,7 @@ public class QueueCommand {
 
             ArrayList<Document> documentArrayList = databaseWrapper.getQueue(event.getGuild().getId());
 
-            for (int i = 0; i < documentArrayList.size(); i++) {
+            for (int i = 0; i < 15; i++) {
                 Document song = documentArrayList.get(i);
                 String emoji = "";
 
