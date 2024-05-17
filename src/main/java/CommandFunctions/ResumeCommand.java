@@ -29,7 +29,7 @@ public class ResumeCommand {
         switch (commandCheckResult) {
             case 0:
                 PlayerManager.get().getGuildMusicManager(Objects.requireNonNull(event.getGuild())).getTrackScheduler().resume();
-                MessageWrapper.genericResponse(event, "Resumed", "The song has been paused");
+                MessageWrapper.genericResponse(event, "Resumed", "The song has been resumed");
                 try {
                     DatabaseWrapper db = new DatabaseWrapper();
                     Message message = guild.getTextChannelById(db.getActiveChannel(guild)).retrieveMessageById(db.getActiveMessage(guild.getId())).complete();

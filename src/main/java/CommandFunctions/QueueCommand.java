@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 import org.bson.Document;
+import utils.Page;
+import utils.PageList;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -15,7 +17,9 @@ import java.util.logging.Logger;
 public class QueueCommand {
     public static boolean queueCommand(SlashCommandInteractionEvent event) {
         Logger logger = Logger.getLogger("orion");
-        // TODO: LIMIT THIS FUCKING COMMAND TO 4096 CHARACTERS
+        // TODO: MAKE THE REPONSE HAVE TWO BUTTONS, ONE FOR NEXT PAGE AND ONE FOR PREVIOUS PAGE
+        // TODO: THESE BUTTONS CALL ON PAGELIST METHODS NEXT PAGE / PREVIOUS PAGE TO CHANGE THE CURRENT PAGE
+        // TODO: THEN ADD THIS FUNCTIONALITY TO THE BUTTON LISTENER
 
         event.deferReply().queue();
         try {
@@ -24,9 +28,31 @@ public class QueueCommand {
             StringBuilder stringBuilder2 = new StringBuilder();
 
             ArrayList<Document> documentArrayList = databaseWrapper.getQueue(event.getGuild().getId());
+            PageList pageList = new PageList();
 
-            for (int i = 0; i < 15; i++) {
-                Document song = documentArrayList.get(i);
+            int totalAmountOfSongs = documentArrayList.size();
+            int songNumber = 1;
+            int pageNumber = 1;
+            Page page = new Page(pageNumber, 15);
+            pageList.addPage(page);
+            while (songNumber < totalAmountOfSongs) {
+                if (pageList.getPage(pageNumber).getPageSize() == 15) {
+                    pageNumber ++;
+                    if (!pageList.doesPageExist(pageNumber)) {
+                        page = new Page(pageNumber, 15);
+                        pageList.addPage(page);
+                    }
+                } else {
+                    page = pageList.getPage(pageNumber);
+                }
+                page.addContent(documentArrayList.get(songNumber));
+                songNumber++;
+            }
+
+            Page currentPage = pageList.getCurrentPage();
+            ArrayList<Document> songs = currentPage.getPageContent();
+            for (int i = 0; i < songs.size(); i++) {
+                Document song = songs.get(i);
                 String emoji = "";
 
                 switch(song.get("platform").toString()) {
@@ -59,7 +85,6 @@ public class QueueCommand {
         } catch (DBEmptyQueueException | DBConnectionException e) {
             MessageWrapper.errorResponse(event, "Error " + e.getMessage());
         }
-
         return false;
     }
 
