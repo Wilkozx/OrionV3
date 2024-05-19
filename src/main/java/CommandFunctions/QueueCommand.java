@@ -69,7 +69,7 @@ public class QueueCommand {
 
                 stringBuilder.append(i).append(song.keySet()).append(" ").append(song.values()).append("\n");
                 stringBuilder2.append(emoji)
-                              .append(" **" + (i+1) + ".** ")
+                              .append(" **" + (((currentPage.getPageNumber() - 1) * 15) + (i + 1)) + ".** ")
                               .append("[")
                                   .append(song.get("songTitle").toString())
                               .append("]")
@@ -143,7 +143,7 @@ public class QueueCommand {
 
                 stringBuilder.append(i).append(song.keySet()).append(" ").append(song.values()).append("\n");
                 stringBuilder2.append(emoji)
-                        .append(" **" + (i+1) + ".** ")
+                        .append(" **" + (((currentPage.getPageNumber() - 1) * 15) + (i + 1)) + ".** ")
                         .append("[")
                         .append(song.get("songTitle").toString())
                         .append("]")
