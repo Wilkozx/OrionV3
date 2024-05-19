@@ -15,7 +15,7 @@ public class Page {
     }
 
     public int getPageNumber() {
-        return pageNumber - 1;
+        return pageNumber + 1;
     }
 
     public int getPageSize() {

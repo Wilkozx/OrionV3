@@ -197,4 +197,30 @@ public class MessageWrapper {
 
         event.replyModal(mb.build()).queue();
     }
+
+    public static void queueResponse(SlashCommandInteractionEvent event, String title, String body) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(title);
+        embedBuilder.setDescription(body);
+        embedBuilder.setColor(new Color(255,69,0));
+
+        // TODO: CHANGE EMOJIS FOR LASTPAGE / NEXTPAGE BELOW
+        Button lastpage = Button.secondary("lastpage", Emoji.fromFormatted("<:stop1:1201904074690400286>"));
+        Button nextpage = Button.secondary("nextpage", Emoji.fromFormatted("<:skip1:1201904072001585174>"));
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).setActionRow(lastpage, nextpage).queue();
+    }
+
+    public static void queueResponse(ButtonInteractionEvent event, String title, String body) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(title);
+        embedBuilder.setDescription(body);
+        embedBuilder.setColor(new Color(255,69,0));
+
+        // TODO: CHANGE EMOJIS FOR LASTPAGE / NEXTPAGE BELOW
+        Button lastpage = Button.secondary("lastpage", Emoji.fromFormatted("<:stop1:1201904074690400286>"));
+        Button nextpage = Button.secondary("nextpage", Emoji.fromFormatted("<:skip1:1201904072001585174>"));
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).setActionRow(lastpage, nextpage).queue();
+    }
 }

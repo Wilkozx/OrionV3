@@ -18,12 +18,14 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import utils.PageList;
 
 public class ButtonListener extends ListenerAdapter{
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
         Logger logger = Logger.getLogger("orion");
         String eventType = event.getButton().getId().toLowerCase();
+        PageList pageList;
         logger.info(event.toString());
         switch (eventType) {
             case "skip":
@@ -128,7 +130,16 @@ public class ButtonListener extends ListenerAdapter{
                 PlayCommand.playCommand(event);
                 break;
             case "website":
-                
+                break;
+            case "lastpage":
+                pageList = PageList.getInstance();
+                pageList.previousPage();
+                QueueCommand.queueCommand(event);
+                break;
+            case "nextpage":
+                pageList = PageList.getInstance();
+                pageList.nextPage();
+                QueueCommand.queueCommand(event);
                 break;
             default:
                 MessageWrapper.errorResponse(event, "Invalid button, unknown error. Please try again.");
