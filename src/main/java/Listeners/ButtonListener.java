@@ -135,11 +135,13 @@ public class ButtonListener extends ListenerAdapter{
                 pageList = PageList.getInstance();
                 pageList.previousPage();
                 QueueCommand.queueCommand(event);
+                event.getMessage().delete().queue();
                 break;
             case "nextpage":
                 pageList = PageList.getInstance();
                 pageList.nextPage();
                 QueueCommand.queueCommand(event);
+                event.getMessage().delete().queue();
                 break;
             default:
                 MessageWrapper.errorResponse(event, "Invalid button, unknown error. Please try again.");
