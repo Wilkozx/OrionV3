@@ -94,8 +94,6 @@ public class PlayerManager {
 
                 MessageWrapper.errorResponse(activeChannel, "Failed to load track", songName + " - " + e.getMessage());
 
-                
-
                 PlayCommand.playLatest(guild);
             }
 

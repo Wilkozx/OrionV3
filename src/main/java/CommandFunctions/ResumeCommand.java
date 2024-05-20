@@ -26,6 +26,8 @@ public class ResumeCommand {
 
         short commandCheckResult = VoiceCommandChecks.checkVoiceState(event.getMember().getVoiceState(), event.getGuild().getSelfMember().getVoiceState());
 
+        PlayCommand.playLatest(event.getGuild());
+
         switch (commandCheckResult) {
             case 0:
                 PlayerManager.get().getGuildMusicManager(Objects.requireNonNull(event.getGuild())).getTrackScheduler().resume();
@@ -68,6 +70,8 @@ public class ResumeCommand {
         event.deferReply().queue();
 
         short commandCheckResult = VoiceCommandChecks.checkVoiceState(event.getMember().getVoiceState(), event.getGuild().getSelfMember().getVoiceState());
+
+        PlayCommand.playLatest(event.getGuild());
 
         switch (commandCheckResult) {
             case 0:
