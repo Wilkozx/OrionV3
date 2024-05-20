@@ -82,6 +82,16 @@ public class MessageWrapper {
         event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
     }
 
+    public static void errorResponse(TextChannel textChannel, String title, String body) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(title);
+        embedBuilder.setDescription(body);
+        embedBuilder.setColor(Color.red);
+
+
+        textChannel.sendMessageEmbeds(embedBuilder.build()).queue();
+    }
+
     public static void startedPlaying(TextChannel textChannel, Document song) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Now Playing");

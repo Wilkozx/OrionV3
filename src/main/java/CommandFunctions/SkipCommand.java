@@ -85,6 +85,7 @@ public class SkipCommand {
 
     private static void skipSong(Guild guild) {
         PlayerManager.get().getGuildMusicManager(guild).getTrackScheduler().stop();
+        PlayCommand.playLatest(guild);
     }
 
     public static boolean skipCommandDepricated(SlashCommandInteractionEvent event) {

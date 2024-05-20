@@ -346,14 +346,14 @@ public class PlayCommand {
                 logger.info("Playing song: " + song.get("songTitle").toString() + " by " + song.get("artist").toString());
 
                 playerManager.play(guild, songUrl);
-                logger.info("Song successfully playing!");
+                logger.info("Song send to audio manager.");
                 return true;
             } catch (DBEmptyQueueException | DBConnectionException e) {
                 logger.info("Error playing song, queue is empty in guild " + guild.getId());
                 //StopCommand.initShutdown(guild);
             }
         } else {
-            logger.info("Error playing song");
+            logger.info("Error playing song, song already playing in guild " + guild.getId());
             return false;
         }
 

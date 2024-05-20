@@ -179,6 +179,32 @@ public class YoutubeWrapper {
         }
     }
 
+    public static String getTitle(String url) {
+        // TODO: if contins playlist popup choice?
+
+        try {
+            URL localurl = new URL("https://noembed.com/embed?url=" + url);
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+        }
+
+        try {
+            logger.info("Parsing Youtube URL: " + url);
+            URL localurl = new URL("https://noembed.com/embed?url=" + url);
+
+            HttpURLConnection httpURLConnection = (HttpURLConnection) localurl.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.connect();
+            JsonObject jsonObject = getJsonObject(localurl);
+
+            return jsonObject.get("title").getAsString();
+        } catch (Exception e) {
+            logger.severe(e.getMessage());
+            return url;
+        }
+        
+    }
+
     private static JsonArray getJsonArray(URL localurl) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         Scanner scanner = new Scanner(localurl.openStream());
