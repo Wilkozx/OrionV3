@@ -86,6 +86,7 @@ public class MessageWrapper {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(title);
         embedBuilder.setDescription(body);
+        embedBuilder.setAuthor("Error", null, "https://www.lifepng.com/wp-content/uploads/2020/12/Letter-X-Roundlet-png-hd.png");
         embedBuilder.setColor(Color.red);
 
 
