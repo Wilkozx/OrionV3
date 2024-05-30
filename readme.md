@@ -1,0 +1,2 @@
+# Orion
+Orion is a discord bot created in Java, using maven to build and utilising dependencies such as lava player and JDA. Java was chosen for this project as it was the language we were learning at the time of inception for this project.
