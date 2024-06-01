@@ -29,7 +29,7 @@ public class QueueCommand {
             pageList.clearPages();
 
             int totalAmountOfSongs = documentArrayList.size();
-            int songNumber = 1;
+            int songNumber = 0;
             int pageNumber = 0;
             Page page = new Page(pageNumber, 15);
             pageList.addPage(page);
@@ -103,7 +103,7 @@ public class QueueCommand {
             pageList.clearPages();
 
             int totalAmountOfSongs = documentArrayList.size();
-            int songNumber = 1;
+            int songNumber = 0;
             int pageNumber = 0;
             Page page = new Page(pageNumber, 15);
             pageList.addPage(page);
