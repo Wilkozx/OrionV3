@@ -17,6 +17,7 @@ import MusicSearch.YoutubeWrapper;
 import Wrapper.DatabaseWrapper;
 import Wrapper.MessageWrapper;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import okhttp3.internal.ws.RealWebSocket.Message;
@@ -29,9 +30,13 @@ public class PlayerManager {
     private static PlayerManager INSTANCE;
     private final HashMap<Long, GuildMusicManager> guildMusicManagers = new HashMap<>();
     private final AudioPlayerManager audioPlayerManager = new DefaultAudioPlayerManager();
+    private final static Dotenv dotenv = Dotenv.load();
 
     private PlayerManager() {
-        audioPlayerManager.registerSourceManager(new YoutubeAudioSourceManager());
+        YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
+        String youtubeRefreshToken = dotenv.get("YOUTUBEREFRESHTOKEN");
+        youtubeAudioSourceManager.useOauth2(youtubeRefreshToken, true);
+        audioPlayerManager.registerSourceManager(youtubeAudioSourceManager);
         AudioSourceManagers.registerRemoteSources(audioPlayerManager);
         AudioSourceManagers.registerLocalSource(audioPlayerManager);
     }
